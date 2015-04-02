@@ -1,0 +1,121 @@
+\documentclass[submission,copyright,creativecommons]{eptcs}
+\providecommand{\event}{TTC 2015}
+%\usepackage{breakurl} % Not needed if you use pdflatex only.
+% this breaks the document in TeXstudio
+
+% TTC additions
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{xspace}
+\usepackage{rotating,amsmath,amsfonts,amssymb}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{todonotes}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{framed}
+
+% custom commands
+\definecolor{negcolor}{RGB}{223,49,35}
+\definecolor{newcolor}{RGB}{43,183,47}
+\definecolor{delcolor}{RGB}{59,66,161}
+\newcommand{\union}{\cup}
+\newcommand{\intersection}{\cap}
+\newcommand{\parentheses}[1]{\left(#1\right)}
+\newcommand{\op}[2]{\mathrm{#1}\parentheses{#2}}
+\newcommand{\figref}[1]{\autoref{fig:#1}}
+\newcommand{\lstref}[1]{\autoref{lst:#1}}
+\newcommand{\naturaljoin}{\bowtie}
+\newcommand{\antijoin}{\, \triangleright \,}
+\newcommand{\eiq}{\textsc{EMF-IncQuery}}
+\newcommand{\iqd}{\textsc{IncQuery-D}}
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+
+\newcommand{\ttcfig}[2]{
+\begin{figure}[htb] 
+	\centering
+	\includegraphics[width=\textwidth]{figures/#1}
+	\caption{#2.}
+	\label{fig:#1}
+\end{figure}}
+
+\newcommand{\ttcpattern}[1]{
+\begin{figure}[H] 
+	\centering
+	\includegraphics[scale=0.3]{figures/#1}
+\end{figure}}
+
+\newcommand{\ttcfigscale}[3]{
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=#3]{figures/#1}
+	\caption{#2.}
+	\label{fig:#1}
+\end{figure}}
+
+\newcommand{\ttcsubfig}[2]{
+	\begin{subfigure}[b]{\textwidth}
+		\centering
+		\includegraphics[scale=0.6]{figures/#1}
+		\caption{#2}
+		\label{fig:#1}
+	\end{subfigure}
+}
+
+\definecolor{lightgray}{rgb}{0.95,0.95,0.95}
+\lstset{
+	basicstyle=\scriptsize\ttfamily, % print whole listing small
+	keywordstyle=\color{black}\bfseries, % bold black keywords
+	identifierstyle=, % nothing happens
+	commentstyle=\color{green}, % green comments
+	stringstyle=\scriptsize,
+	showstringspaces=false, % no special string spaces
+	aboveskip=3pt,
+	belowskip=3pt,
+	backgroundcolor=\color{lightgray},
+	columns=flexible,
+	keepspaces=true
+} 
+
+% metadata
+\title{Java Refactoring Case: a VIATRA Solution\thanks{This work was partially supported by the MONDO (EU ICT-611125) project}}
+\author{D\'{a}niel Stein \qquad G\'{a}bor Sz\'{a}rnyas \qquad Zolt\'{a}n Ujhelyi \qquad Istv\'{a}n R\'{a}th
+\institute{Budapest University of Technology and Economics\\
+Department of Measurement and Information Systems\\
+H-1117 Magyar tud\'{o}sok krt. 2, Budapest, Hungary}
+\email{stein@inf.mit.bme.hu, \{szarnyas, ujhelyi, rath\}@mit.bme.hu}
+}
+\def\titlerunning{Java Refactoring Case: a VIATRA Solution}
+\def\authorrunning{D. Stein et al.}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper presents a solution for the Java Refactoring Case of the Transformation Tool Contest 2015, using ...
+\end{abstract}
+
+\section{Introduction}
+
+
+\section{Case Description}
+
+
+\section{Summary}
+
+
+
+\bibliographystyle{eptcs}
+\bibliography{ttc}
+
+\clearpage
+
+\appendix
+\section{Appendix}
+
+Some content
+
+\end{document}
