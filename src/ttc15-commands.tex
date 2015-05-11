@@ -1,0 +1,144 @@
+% TTC additions
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{xspace}
+\usepackage{rotating,amsmath,amsfonts,amssymb}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{todonotes}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{framed}
+
+% custom commands
+\definecolor{negcolor}{RGB}{223,49,35}
+\definecolor{newcolor}{RGB}{43,183,47}
+\definecolor{delcolor}{RGB}{59,66,161}
+\newcommand{\union}{\cup}
+\newcommand{\intersection}{\cap}
+\newcommand{\parentheses}[1]{\left(#1\right)}
+\newcommand{\op}[2]{\mathrm{#1}\parentheses{#2}}
+\newcommand{\figref}[1]{\autoref{fig:#1}}
+\newcommand{\lstref}[1]{\autoref{lst:#1}}
+\newcommand{\naturaljoin}{\bowtie}
+\newcommand{\antijoin}{\, \triangleright \,}
+\newcommand{\eiq}{\mbox{\textsc{EMF-IncQuery}}\@\xspace}
+\newcommand{\viatra}{\mbox{\textsc{Viatra}}\@\xspace}
+\newcommand{\viatratwo}{\mbox{\textsc{Viatra2}}\@\xspace}
+\newcommand{\evm}{\mbox{\textsc{Viatra-EVM}}\@\xspace}
+\newcommand{\jdt}{\mbox{Eclipse JDT}\@\xspace}
+\newcommand{\xtend}{\mbox{Xtend}\@\xspace}
+
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+
+\newcommand{\ie}{i.e.\@\xspace}
+\newcommand{\Ie}{I.e.\@\xspace}
+\newcommand{\eg}{e.g.\@\xspace}
+\newcommand{\Eg}{E.g.\@\xspace}
+\newcommand{\etal}{et al.\@\xspace}
+\newcommand{\etc}{etc.\@\xspace}
+
+\newcommand{\ttcfig}[3]{
+\begin{figure}[htb] 
+	\centering
+	\includegraphics[width=#3\textwidth]{figures/#1}
+	\caption{#2.}
+	\label{fig:#1}
+\end{figure}}
+
+\newcommand{\ttcpattern}[1]{
+\begin{figure}[H] 
+	\centering
+	\includegraphics[scale=0.3]{figures/#1}
+\end{figure}}
+
+\newcommand{\ttcfigscale}[3]{
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=#3]{figures/#1}
+	\caption{#2.}
+	\label{fig:#1}
+\end{figure}}
+
+\newcommand{\ttcsubfig}[2]{
+	\begin{subfigure}[b]{\textwidth}
+		\centering
+		\includegraphics[scale=0.6]{figures/#1}
+		\caption{#2}
+		\label{fig:#1}
+	\end{subfigure}
+}
+
+\definecolor{lightgray}{rgb}{0.95,0.95,0.95}
+\lstset{
+	basicstyle=\scriptsize\ttfamily, % print whole listing small
+	keywordstyle=\color{black}\bfseries, % bold black keywords
+	identifierstyle=, % nothing happens
+	commentstyle=\color{green}, % green comments
+	stringstyle=\scriptsize,
+	showstringspaces=false, % no special string spaces
+	aboveskip=3pt,
+	belowskip=3pt,
+	backgroundcolor=\color{lightgray},
+	columns=flexible,
+	keepspaces=true
+} 
+
+
+\usepackage{color}
+\definecolor{listinggray}{rgb}{0.92,0.92,0.92}
+\definecolor{keywordcolor}{rgb}{0.5,0,0.1}
+\definecolor{commentcolor}{rgb}{0,0.3,0.1}
+\definecolor{stringcolor}{rgb}{0,0,1}
+\lstdefinelanguage{IQPL}
+{morekeywords={@QueryBasedFeature,@Constraint,count,pattern,package,
+    neg,find,import,true,false,or,check,job,action,state,severity,location,message,
+    oclIsKindOf,self,exists,includes,invariant,class},
+ sensitive=true, morecomment=[l]{//}, morecomment=[s]{/*}{*/},
+ morestring=[b]{"},
+}
+\newcommand{\listingiqpl}[1]
+{
+\lstset{backgroundcolor=\color{listinggray}}
+\lstset{basicstyle=\scriptsize\ttfamily}
+\lstset{commentstyle=\color{commentcolor}\ttfamily}
+\lstset{stringstyle=\color{stringcolor}\ttfamily}
+\lstset{frameround=tttt}
+\lstset{captionpos=b}
+\lstset{keywordstyle=\color{keywordcolor}\bfseries\ttfamily}
+\lstset{showstringspaces=false}
+\lstset{tabsize=2}
+\lstset{numbers=left,numberstyle=\scriptsize\ttfamily,stepnumber=1,numbersep=5pt}
+\lstset{language=IQPL}
+\lstset{escapeinside={(*@}{@*)}}
+\lstset{breaklines=true}
+\lstinputlisting{#1}
+}
+
+\lstdefinelanguage{Xtend}{
+ morekeywords={class,public,def,val,var,cached,case,default,extension,false,import,JAVA,WORKFLOWSLOT,let,new,null,private,create,switch,this,true,reexport,around,if,then,else,context,DEFAULT_NO_UPDATE_AND_DISAPPEAR,DEFAULT,APPEARED,DISAPPEARED,UPDATED,processor},
+ keywordstyle=[2]{\textbf},
+ morecomment=[l]{//}, 
+ morecomment=[s]{/*}{*/}, 
+ morestring=[b]",
+ tabsize=2
+}
+\newcommand{\listingxtend}[1]{
+%\lstset{backgroundcolor=\color{listinggray}}
+\lstset{basicstyle=\scriptsize\ttfamily}
+\lstset{numbers=left,numberstyle=\tiny\ttfamily,stepnumber=1,numbersep=5pt}
+\lstset{commentstyle=\color{commentcolor}\ttfamily}
+\lstset{stringstyle=\color{stringcolor}\ttfamily}
+\lstset{keywordstyle=\color{keywordcolor}\bfseries\ttfamily}
+\lstset{breaklines=true}
+\lstset{language=Xtend}
+\lstset{mathescape=true}
+\lstset{basicstyle=\scriptsize\ttfamily}
+\lstset{escapeinside={(*@}{@*)}}
+\lstset{literate=*{[guilleft]}{\guillemotleft{}}{1}{[guilright]}{\guillemotright{}}{1},}
+%\lstset{literate={\-}{}{0\discretionary{-}{}{}}}
+\lstinputlisting{#1}
+}
