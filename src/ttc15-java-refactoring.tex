@@ -28,16 +28,28 @@
 \newcommand{\lstref}[1]{\autoref{lst:#1}}
 \newcommand{\naturaljoin}{\bowtie}
 \newcommand{\antijoin}{\, \triangleright \,}
-\newcommand{\eiq}{\textsc{EMF-IncQuery}}
-\newcommand{\iqd}{\textsc{IncQuery-D}}
+\newcommand{\eiq}{\mbox{\textsc{EMF-IncQuery}}\@\xspace}
+\newcommand{\viatra}{\mbox{\textsc{Viatra}}\@\xspace}
+\newcommand{\viatratwo}{\mbox{\textsc{Viatra2}}\@\xspace}
+\newcommand{\evm}{\mbox{\textsc{Viatra-EVM}}\@\xspace}
+\newcommand{\jdt}{\mbox{Eclipse JDT}\@\xspace}
+\newcommand{\xtend}{\mbox{Xtend}\@\xspace}
+
 \renewcommand{\sectionautorefname}{Section}
 \renewcommand{\subsectionautorefname}{Section}
 \renewcommand{\subsubsectionautorefname}{Section}
 
-\newcommand{\ttcfig}[2]{
+\newcommand{\ie}{i.e.\@\xspace}
+\newcommand{\Ie}{I.e.\@\xspace}
+\newcommand{\eg}{e.g.\@\xspace}
+\newcommand{\Eg}{E.g.\@\xspace}
+\newcommand{\etal}{et al.\@\xspace}
+\newcommand{\etc}{etc.\@\xspace}
+
+\newcommand{\ttcfig}[3]{
 \begin{figure}[htb] 
 	\centering
-	\includegraphics[width=\textwidth]{figures/#1}
+	\includegraphics[width=#3]{figures/#1}
 	\caption{#2.}
 	\label{fig:#1}
 \end{figure}}
@@ -80,13 +92,70 @@
 	keepspaces=true
 } 
 
+
+\usepackage{color}
+\definecolor{listinggray}{rgb}{0.92,0.92,0.92}
+\definecolor{keywordcolor}{rgb}{0.5,0,0.1}
+\definecolor{commentcolor}{rgb}{0,0.3,0.1}
+\definecolor{stringcolor}{rgb}{0,0,1}
+\lstdefinelanguage{IQPL}
+{morekeywords={@QueryBasedFeature,@Constraint,count,pattern,package,
+    neg,find,import,true,false,or,check,job,action,state,severity,location,message,
+    oclIsKindOf,self,exists,includes,invariant,class},
+ sensitive=true, morecomment=[l]{//}, morecomment=[s]{/*}{*/},
+ morestring=[b]{"},
+}
+\newcommand{\listingiqpl}[1]
+{
+\lstset{backgroundcolor=\color{listinggray}}
+\lstset{basicstyle=\scriptsize\ttfamily}
+\lstset{commentstyle=\color{commentcolor}\ttfamily}
+\lstset{stringstyle=\color{stringcolor}\ttfamily}
+\lstset{frameround=tttt}
+\lstset{captionpos=b}
+\lstset{keywordstyle=\color{keywordcolor}\bfseries\ttfamily}
+\lstset{showstringspaces=false}
+\lstset{tabsize=2}
+\lstset{numbers=left,numberstyle=\scriptsize\ttfamily,stepnumber=1,numbersep=5pt}
+\lstset{language=IQPL}
+\lstset{escapeinside={(*@}{@*)}}
+\lstset{breaklines=true}
+\lstinputlisting{#1}
+}
+
+\lstdefinelanguage{Xtend}{
+ morekeywords={class,public,def,val,var,cached,case,default,extension,false,import,JAVA,WORKFLOWSLOT,let,new,null,private,create,switch,this,true,reexport,around,if,then,else,context,DEFAULT_NO_UPDATE_AND_DISAPPEAR,DEFAULT,APPEARED,DISAPPEARED,UPDATED,processor},
+ keywordstyle=[2]{\textbf},
+ morecomment=[l]{//}, 
+ morecomment=[s]{/*}{*/}, 
+ morestring=[b]",
+ tabsize=2
+}
+\newcommand{\listingxtend}[1]{
+%\lstset{backgroundcolor=\color{listinggray}}
+\lstset{basicstyle=\scriptsize\ttfamily}
+\lstset{numbers=left,numberstyle=\tiny\ttfamily,stepnumber=1,numbersep=5pt}
+\lstset{commentstyle=\color{commentcolor}\ttfamily}
+\lstset{stringstyle=\color{stringcolor}\ttfamily}
+\lstset{keywordstyle=\color{keywordcolor}\bfseries\ttfamily}
+\lstset{breaklines=true}
+\lstset{language=Xtend}
+\lstset{mathescape=true}
+\lstset{basicstyle=\scriptsize\ttfamily}
+\lstset{escapeinside={(*@}{@*)}}
+\lstset{literate=*{[guilleft]}{\guillemotleft{}}{1}{[guilright]}{\guillemotright{}}{1},}
+
+%\lstset{literate={\-}{}{0\discretionary{-}{}{}}}
+\lstinputlisting{#1}
+}
+
 % metadata
-\title{Java Refactoring Case: a VIATRA Solution\thanks{This work was partially supported by the MONDO (EU ICT-611125) project}}
-\author{D\'{a}niel Stein \qquad G\'{a}bor Sz\'{a}rnyas \qquad Zolt\'{a}n Ujhelyi \qquad Istv\'{a}n R\'{a}th
+\title{Java Refactoring Case: a \viatra Solution\thanks{This work was partially supported by the MONDO (EU ICT-611125) project}}
+\author{D\'{a}niel Stein \qquad G\'{a}bor Sz\'{a}rnyas \qquad \'{A}bel Heged\"{u}s \qquad Istv\'{a}n R\'{a}th
 \institute{Budapest University of Technology and Economics\\
 Department of Measurement and Information Systems\\
 H-1117 Magyar tud\'{o}sok krt. 2, Budapest, Hungary}
-\email{daniel.stein@inf.mit.bme.hu, \{szarnyas, ujhelyi, rath\}@mit.bme.hu}
+\email{daniel.stein@inf.mit.bme.hu, \{szarnyas, abel.hegedus, rath\}@mit.bme.hu}
 }
 \def\titlerunning{Java Refactoring Case: a VIATRA Solution}
 \def\authorrunning{D. Stein et al.}
@@ -95,18 +164,55 @@ H-1117 Magyar tud\'{o}sok krt. 2, Budapest, Hungary}
 \maketitle
 
 \begin{abstract}
-This paper presents a solution for the Java Refactoring Case of the Transformation Tool Contest 2015, using ...
+This paper presents a solution for the Java Refactoring Case of the Transformation Tool Contest 2015. The solution utilises \jdt for creating the program graph; while \eiq, \viatra and the \xtend programming language are used for defining and performing the model transformations.
 \end{abstract}
 
 \section{Introduction}
 
 
+\subsection{\eiq}
+
+Automated model transformations are frequently integrated to modeling environments, requiring both high performance and a concise programming interface to support software engineers. The objective of the \eiq\cite{eiq-homepage} framework is to provide a declarative way to define queries over EMF models. \eiq extended the pattern language of \viatratwo with new features (including transitive closure, role navigation, match count) and tailored it to EMF models~\cite{iqpl}. \eiq is developed with a focus on \emph{incremental query evaluation}. 
+
+\subsection{\viatra}
+
+The \viatra framework supports the development of model transformations with specific focus on event-driven, reactive transformations~\cite{viatra}. Building upon the incremental query support of the \eiq project, \viatra offers a language to define transformations and a reactive transformation engine to execute certain transformations upon changes in the underlying model.
+
+The \viatra project provides:
+
+\begin{itemize}
+	\item An internal DSL over the \xtend~\cite{Xtend} language to specify both batch and event-driven, reactive transformations.
+	\item A complex event-processing engine over EMF models to specify reactions upon detecting complex sequences of events.
+	\item A rule-based design space exploration framework to explore design candidates as models satisfying multiple criteria.
+	\item A model obfuscator to remove sensitive information from a confidential model (\eg to create bug reports).
+\end{itemize}
+
+The current \viatra{} project is a full rewrite of the previous \viatra2{} framework, now with full compatibility and support for EMF models. The history of the \viatra{} family is described in~\cite{viatra-history}.
+
 \section{Case Description}
 
+\cite{ttc-refactoring-case}
+
+Eclipse Java Development Tools~\cite{jdt}
+
+\ttcfig{pg}{Caption}{0.6\textwidth}
+
+\ttcfig{trace-mm}{Trace}{0.6\textwidth}
+
+\section{Implementation}
+
+
+
+Xtend~\cite{Xtend}, Oracle JDK8, Apache Maven~\cite{Maven}
+
+
+Source code: \url{https://github.com/FTSRG/java-refactoring-ttc-viatra}
 
 \section{Summary}
 
+The paper presented a solution for the Java Refactoring case of the 2015 Transformation Tool Contest.
 
+\todo{Future work otleteket lehetne emliteni}
 
 \bibliographystyle{eptcs}
 \bibliography{ttc}
@@ -116,6 +222,8 @@ This paper presents a solution for the Java Refactoring Case of the Transformati
 \appendix
 \section{Appendix}
 
-Some content
+\listingxtend{code/transformation.xtend}
+
+\listingiqpl{code/pattern.eiq}
 
 \end{document}
