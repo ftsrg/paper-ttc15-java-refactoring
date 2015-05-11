@@ -49,7 +49,7 @@
 \newcommand{\ttcfig}[3]{
 \begin{figure}[htb] 
 	\centering
-	\includegraphics[width=#3]{figures/#1}
+	\includegraphics[width=#3\textwidth]{figures/#1}
 	\caption{#2.}
 	\label{fig:#1}
 \end{figure}}
@@ -150,7 +150,7 @@
 }
 
 % metadata
-\title{Java Refactoring Case: a \viatra Solution\thanks{This work was partially supported by the MONDO (EU ICT-611125) project}}
+\title{Java Refactoring Case: a \viatra Solution\thanks{This work was partially supported by the MONDO (EU ICT-611125) project.}}
 \author{D\'{a}niel Stein \qquad G\'{a}bor Sz\'{a}rnyas \qquad \'{A}bel Heged\"{u}s \qquad Istv\'{a}n R\'{a}th
 \institute{Budapest University of Technology and Economics\\
 Department of Measurement and Information Systems\\
@@ -169,6 +169,9 @@ This paper presents a solution for the Java Refactoring Case of the Transformati
 
 \section{Introduction}
 
+The use of automated model transformations is a key factor in modern model-driven system engineering. Model transformations allow to query, derive and manipulate large industrial models, including models based on existing systems, e.g. source code models created with reverse engineering techniques. Since such transformations are frequently integrated to modeling environments, they need to feature both high performance and a concise programming interface to support software engineers.
+
+Refactoring operations are often used in software engineering to improve the readability, maintainability of existing source code without altering the behaviour of the software.
 
 \subsection{\eiq}
 
@@ -187,32 +190,66 @@ The \viatra project provides:
 	\item A model obfuscator to remove sensitive information from a confidential model (\eg to create bug reports).
 \end{itemize}
 
-The current \viatra{} project is a full rewrite of the previous \viatra2{} framework, now with full compatibility and support for EMF models. The history of the \viatra{} family is described in~\cite{viatra-history}.
+The current \viatra{} project is a full rewrite of the previous \viatratwo{} framework, now with full compatibility and support for EMF models. The history of the \viatra{} family is described in~\cite{viatra-history}.
 
 \section{Case Description}
 
-\cite{ttc-refactoring-case}
+The goal of the Java Refactoring Case~\cite{ttc-refactoring-case} is to use model transformation tools to perform refactoring operations on Java source code. The main challenges of the case are the following:
 
-Eclipse Java Development Tools~\cite{jdt}
+\begin{enumerate}
+\item Transform the \emph{Java source code} to a \emph{program graph} (PG). The source code and the program graph must be synchronised using a bidirectional transformation.
+\item Perform the refactoring transformation on the program graph.
+\end{enumerate}
 
-\ttcfig{pg}{Caption}{0.6\textwidth}
+The source code is defined in a restricted sub-language of Java 1.4. The EMF metamodel of the PG is provided in the case description. The case considers two refactoring operations:
 
-\ttcfig{trace-mm}{Trace}{0.6\textwidth}
+\begin{itemize}
+\item \textsf{Pull Up Method}
+\item \textsf{Create Superclass}
+\end{itemize}
 
 \section{Implementation}
 
+The source code of the solution is available as an open-source project.\footnote{\url{https://github.com/FTSRG/java-refactoring-ttc-viatra}}
 
+The solution was developed in the Eclipse IDE. For setting up the development environment, please refer to the readme file. The projects are not tied to the Eclipse environment and can be compiled with the Apache Maven~\cite{Maven} build automation tool. This offers a number of benefits, including easy portability and the possibility of continuous integration.
 
-Xtend~\cite{Xtend}, Oracle JDK8, Apache Maven~\cite{Maven}
+The solution is written in Java~8 and Xtend~\cite{Xtend}.
 
+\todo[inline]{ide kellene egy abra sorszamokkal, amikre lehet hivatkozni a kovetkezokben}
 
-Source code: \url{https://github.com/FTSRG/java-refactoring-ttc-viatra}
+\subsection{Parsing the Source Code to the ASG}
+
+The solution uses the parser of Eclipse Java Development Tools~\cite{jdt}, which is also used in the Eclipse Java IDE. The parser generates the Abstract Syntax Graph (ASG) from the provided source code files.
+
+\ttcfig{pg}{Caption}{0.6}
+
+\ttcfig{trace-mm}{Metamodel of the trace model}{0.6}
+
+\subsection{Synchronising the ASG and the PG}
+
+As \viatra does not support bidirectional transformations, the JDT ASG--PG transformation was implemented as two separate transformations:
+
+\begin{description}
+\item[JDT ASG to PG] The JDT model is traversed using the Visitor pattern.
+\item[PG to JDT ASG] \viatra rules are used to detect the changes and execute the appropriate actions to keep the ASG in sync.
+\end{description}
+
+\subsection{Transforming the PG}
+
+The refactoring operations are implemented as model transformations on the PG. Each model transformation is defined in \viatra: the LHS is defined with an \eiq pattern and the RHS is defined with an imperative Xtend code.
+
+\section{Evaluation}
+
+The benchmark were conducted on a 64-bit Arch Linux virtual machine running on SHARE.\footnote{\url{https://is.ieis.tue.nl/staff/pvgorp/share/}}
+
+\ttcfig{benchmark-results}{Benchmark results}{0.8}
 
 \section{Summary}
 
-The paper presented a solution for the Java Refactoring case of the 2015 Transformation Tool Contest.
+The paper presented a solution for the Java Refactoring case of the 2015 Transformation Tool Contest. The solution addresses both challenges (bidirectional synchrosiation and program refactoring) and both refactoring operations (pull up method, create superclass) defined in the case.
 
-\todo{Future work otleteket lehetne emliteni}
+The framework is flexible to allow the user to define new refactoring operations, \eg \textsf{Extract Class} or \textsf{Pull Up Field}.
 
 \bibliographystyle{eptcs}
 \bibliography{ttc}
