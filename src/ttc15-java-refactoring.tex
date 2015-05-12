@@ -94,6 +94,10 @@ As \viatra does not support bidirectional transformations, the JDT ASG--PG trans
 
 The refactoring operations are implemented as model transformations on the PG. Each model transformation is defined in \viatra: the LHS is defined with an \eiq pattern and the RHS is defined with an imperative Xtend code.
 
+\subsection{Transforming the ASG to Source Code}
+
+The ASG is transformed using JDT's \textsf{CompilationUnit.rewrite()} method which converts the changes of the abstract syntax graph to a set of text manipulation operations (\textsf{TextEdit} class).
+
 \section{Evaluation}
 
 The benchmark were conducted on a 64-bit Arch Linux virtual machine running on SHARE.\footnote{\url{https://is.ieis.tue.nl/staff/pvgorp/share/}}
