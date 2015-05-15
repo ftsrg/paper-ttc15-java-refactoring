@@ -76,8 +76,6 @@ The code is written in Java~8 and Xtend~\cite{Xtend}. For developing the Xtend c
 
 \subsection{Parsing the Source Code to the ASG}
 
-\todo[inline]{ide kellene egy abra sorszamokkal, amikre lehet hivatkozni a kovetkezokben}
-
 The solution uses the parser of Eclipse Java Development Tools~\cite{jdt}, which is also used in the Eclipse Java IDE. Compared the MoDisco framework~\cite{MoDisco} (which also builds on JDT), we found JDT to be simpler to deploy outside the Eclipse environment, \ie without defining an Eclipse workspace. Another alternative for parsing the source code would be JaMoPP~\cite{JaMoPP}. However, JaMoPP is only capable of parsing Java 1.5 source files. While this is not a problem when solving this case, we decided to stick to JDT as we already use it in various other projects. JDT is actively developed and hence supports the latest (1.8) version of the Java language. As JDT is frequently used to parse large source code repositories, it is carefully optimised and supports lazy loading. Unlike JaMoPP and MoDisco, JDT does not produce an EMF model.
 
 The JDT parser generates Abstract Syntax Trees (ASTs) from the provided source code files with optional binding resolution. This way, the syntax trees in the separate compilation units can be treated as an Abstract Syntax Graph (ASG).
@@ -88,9 +86,12 @@ The JDT parser generates Abstract Syntax Trees (ASTs) from the provided source c
 
 As \viatra does not support bidirectional transformations, the JDT ASG--PG transformation was implemented as two separate transformations:
 
+\numcircledmod{1}
+
+
 \begin{description}
-\item[JDT ASG to PG] The JDT model is traversed using the Visitor pattern.
-\item[PG to JDT ASG] \viatra rules are used to detect the changes and execute the appropriate actions to keep the ASG in sync.
+\item[JDT ASG to PG] As the JDT model does not support complex queries and traversal operations, we used the Visitor pattern to process the model.
+\item[PG to JDT ASG] For each transformation affecting the PG, we execute the appropriate actions to keep the ASG in sync.
 \end{description}
 
 \subsection{Transforming the PG}
