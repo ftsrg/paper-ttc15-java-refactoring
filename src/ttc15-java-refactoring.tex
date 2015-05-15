@@ -72,11 +72,11 @@ The solution was developed partly in IntelliJ IDEA and partly in the Eclipse IDE
 
 The code is written in Java~8 and Xtend~\cite{Xtend}. For developing the Xtend code and editing the graph patterns, it is required to use the Eclipse IDE. For setting up the IDE, please refer to the readme file. 
 
+\ttcfig{pg}{Workflow of the transformation}{0.7}
+
 \subsection{Parsing the Source Code to the ASG}
 
 \todo[inline]{ide kellene egy abra sorszamokkal, amikre lehet hivatkozni a kovetkezokben}
-
-\ttcfig{pg}{Caption}{0.6}
 
 The solution uses the parser of Eclipse Java Development Tools~\cite{jdt}, which is also used in the Eclipse Java IDE. Compared the MoDisco framework~\cite{MoDisco} (which also builds on JDT), we found JDT to be simpler to deploy outside the Eclipse environment, \ie without defining an Eclipse workspace. Another alternative for parsing the source code would be JaMoPP~\cite{JaMoPP}. However, JaMoPP is only capable of parsing Java 1.5 source files. While this is not a problem when solving this case, we decided to stick to JDT as we already use it in various other projects. JDT is actively developed and hence supports the latest (1.8) version of the Java language. As JDT is frequently used to parse large source code repositories, it is carefully optimised and supports lazy loading. Unlike JaMoPP and MoDisco, JDT does not produce an EMF model.
 
