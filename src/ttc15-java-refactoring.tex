@@ -72,19 +72,19 @@ The code is written in Java~8 and Xtend~\cite{Xtend}. The queries and transforma
 
 \subsection{Java Development Tools}
 
-The solution requires a technology to parse the Java code to a program graph model. While the case mentions the JaMoPP~\cite{JaMoPP} and MoDisco~\cite{MoDisco} technologies, our solution builds on top of the Eclipse Java Development Tools (JDT)~\cite{jdt} used in the Eclipse Java IDE as we were already using JDT in other projects.
+The solution requires a technology to parse the Java code to a program graph model and serialize the refactored model to source code. While the case description mentions the JaMoPP~\cite{JaMoPP} and MoDisco~\cite{MoDisco} technologies, our solution builds on top of the Eclipse Java Development Tools (JDT)~\cite{jdt} used in the Eclipse Java IDE as we were already using JDT in other projects.
 
-Compared to the MoDisco framework (which also builds on JDT), we found JDT to be simpler to deploy outside the Eclipse environment, \ie without defining an Eclipse workspace.
+Compared to the MoDisco framework (which uses JDT internally), we found JDT to be simpler to deploy outside the Eclipse environment, \ie without defining an Eclipse workspace.
 
 Meanwhile, the JaMoPP project has almost completely been abandoned and therefore it is only capable of parsing Java 1.5 source files. While this would not pose a problem for this case, we think it is best to use an actively developed technology such as JDT which supports the latest (1.8) version of the Java language. As JDT is frequently used to parse large source code repositories, it is carefully optimised and supports lazy loading. Unlike JaMoPP and MoDisco, JDT does not produce an EMF model.
 
-The JDT parser generates Abstract Syntax Trees (ASTs) from the provided source code files with optional binding resolution. This way, the syntax trees in the separate compilation units can be treated as an Abstract Syntax Graph (ASG).
+The JDT parser generates Abstract Syntax Trees (ASTs) from the provided source code files with an optional binding resolution mechanism. This way, the separate syntax trees can be connected to an Abstract Syntax Graph (ASG).
 
 \subsection{Workflow of the Transformation}
 
 \ttcfig{pg}{Workflow of the transformation}{0.8}
 
-\autoref{fig:pg} shows the workflow of the transformation. The framework receives the path to the directory containing the source files. Each source files is treated as a \emph{compilation unit} and parsed using JDT~\ttccircled{1} to ASTs. Using JDT's resolving mechanism, these ASTs can be connected to an ASG.
+\autoref{fig:pg} shows the workflow of the transformation. The framework receives the path to the directory containing the source files. Each source files is treated as a \emph{compilation unit} and parsed using JDT~\ttccircled{1} to ASTs. Using JDT's binding resolution mechanism, these ASTs are connected to an ASG.
 
 As the JDT model does not support complex queries and traversal operations, the framework uses a visitor~\ttccircled{2} to perform a two-pass traversal on the ASG:
 
@@ -93,9 +93,11 @@ As the JDT model does not support complex queries and traversal operations, the 
 \item Using the maps populated in the previous step, the visitor creates the cross-references between the objects in the PG (\eg x and y objects).
 \end{enumerate}
 
-To support efficient queries, we extended the program graph metamodel with a \emph{trace model}~(\autoref{fig:trace-mm}). The trace model is generated with a \viatra transformation (\ttccircled{3}, \ttccircled{4}).
+To support efficient queries, we extended the program graph metamodel with a \emph{trace model}~(\autoref{fig:trace-mm}).  The trace model ...
 
-The refactoring operations are implemented as model transformations on the JDT ASG and the PG. Each model transformation is defined in \viatra: the LHS is defined with an \eiq pattern and the RHS is defined with an imperative Xtend code. As \viatra does not support bidirectional transformations, for each transformation affecting the PG, we also execute the appropriate actions to keep the ASG in sync.
+The trace model is generated with a \viatra transformation (\ttccircled{3}, \ttccircled{4}).
+
+The refactoring operations are implemented as model transformations on the JDT ASG and the PG. Each model transformation is defined in \viatra: the LHS is defined with an \eiq pattern and the RHS is defined with an imperative Xtend code. As \viatra does not support bidirectional transformations, for each transformation on the PG, we also execute the appropriate actions on the ASG to keep the two graphs in sync.
 
 \ttcfig{trace-mm}{Metamodel of the trace model}{0.7}
 
@@ -105,15 +107,13 @@ The changes in the ASG are propagated to the source code~\ttccircled{5}. The ASG
 
 \section{Evaluation}
 
-The benchmark were conducted on a 64-bit Ubuntu Linux machine.
+The benchmarks were conducted on a 64-bit Ubuntu Linux machine.
 
 %\ttcfig{benchmark-results}{Benchmark results}{0.8}
 
 \section{Summary}
 
-The paper presented a solution for the Java Refactoring case of the 2015 Transformation Tool Contest. The solution addresses both challenges (bidirectional synchrosiation and program refactoring) and both refactoring operations (pull up method, create superclass) defined in the case.
-
-The framework is flexible to allow the user to define new refactoring operations, \eg \ttcsf{Extract Class} or \ttcsf{Pull Up Field}.
+The paper presented a solution for the Java Refactoring case of the 2015 Transformation Tool Contest. The solution addresses both challenges (bidirectional synchrosiation and program refactoring) and both refactoring operations (pull up method, create superclass) defined in the case. The framework is flexible enough to allow the user to define new refactoring operations, \eg \ttcsf{Extract Class} or \ttcsf{Pull Up Field}.
 
 \bibliographystyle{eptcs}
 \bibliography{ttc}
