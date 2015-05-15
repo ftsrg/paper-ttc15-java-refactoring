@@ -2,7 +2,7 @@
 \providecommand{\event}{TTC 2015}
 
 \input{ttc15-commands.tex}
-
+\usepackage{enumitem}
 
 % metadata
 \title{Java Refactoring Case: a \viatra Solution\thanks{This work was partially supported by the MONDO (EU ICT-611125) project.}}
@@ -24,21 +24,23 @@ This paper presents a solution for the Java Refactoring Case of the 2015 Transfo
 
 \section{Introduction}
 
-The use of automated model transformations is a key factor in modern model-driven system engineering. Model transformations allow to query, derive and manipulate large industrial models, including models based on existing systems, e.g. source code models created with reverse engineering techniques. Since such transformations are frequently integrated to modeling environments, they need to feature both high performance and a concise programming interface to support software engineers.
+This paper describes a solution for the TTC 2015 Java Refactoring Case. The source code of the solution is available as an open-source project.\footnote{\url{https://github.com/FTSRG/java-refactoring-ttc-viatra}} There is also a SHARE image available.\footnote{\url{http://is.ieis.tue.nl/staff/pvgorp/share/?page=ConfigureNewSession&vdi=.vdi}}\todo{SHARE URL}
+
+\section{Preliminaries}
+
+The use of automated model transformations is a key factor in modern model-driven system engineering. Model transformations allow to query, derive and manipulate large industrial models, including models based on existing systems, \eg source code models created with reverse engineering techniques. Since such transformations are frequently integrated to modeling environments, they need to feature both high performance and a concise programming interface to support software engineers.
 
 Refactoring operations are often used in software engineering to improve the readability, maintainability of existing source code without altering the behaviour of the software.
 
 \subsection{\eiq}
 
-Automated model transformations are frequently integrated to modeling environments, requiring both high performance and a concise programming interface to support software engineers. The objective of the \eiq~\cite{models2010, eiq-homepage} framework is to provide a declarative way to define queries over EMF models. \eiq extended the pattern language of \viatratwo with new features (including transitive closure, role navigation, match count) and tailored it to EMF models~\cite{iqpl}. \eiq is developed with a focus on \emph{incremental query evaluation}. 
+The objective of the \eiq~\cite{models2010, eiq-homepage} framework is to provide a declarative way to define queries over EMF models. \eiq extended the pattern language of \viatratwo with new features (including transitive closure, role navigation, match count) and tailored it to EMF models~\cite{iqpl}. While \eiq is developed with a focus on \emph{incremental query evaluation}, the latest version also provides a \emph{local search-based query evaluation} algorithm.
 
 \subsection{\viatra}
 
-The \viatra framework supports the development of model transformations with specific focus on event-driven, reactive transformations~\cite{viatra}. Building upon the incremental query support of the \eiq project, \viatra offers a language to define transformations and a reactive transformation engine to execute certain transformations upon changes in the underlying model.
+The \viatra framework supports the development of model transformations with specific focus on event-driven, reactive transformations~\cite{viatra}. Building upon the incremental query support of \eiq, \viatra offers a language to define transformations and a reactive transformation engine to execute certain transformations upon changes in the underlying model. The \viatra project provides:
 
-The \viatra project provides:
-
-\begin{itemize}
+\begin{itemize}[noitemsep]
 	\item An internal DSL over the \xtend~\cite{Xtend} language to specify both batch and event-driven, reactive transformations.
 	\item A complex event-processing engine over EMF models to specify reactions upon detecting complex sequences of events.
 	\item A rule-based design space exploration framework to explore design candidates as models satisfying multiple criteria.
@@ -51,33 +53,34 @@ The current \viatra{} project is a full rewrite of the previous \viatratwo{} fra
 
 The goal of the Java Refactoring Case~\cite{ttc-refactoring-case} is to use model transformation tools to perform refactoring operations on Java source code. The main challenges of the case are the following:
 
-\begin{enumerate}
-\item Transform the \emph{Java source code} to a \emph{program graph} (PG). The source code and the program graph must be synchronised using a bidirectional transformation.
-\item Perform the refactoring transformation on the program graph.
+\begin{enumerate}[noitemsep]
+\item Transforming the \emph{Java source code} to a \emph{program graph} (PG).
+\item Performing the refactoring transformation on the program graph.
+\item Synchronising the source code and the program graph using a bidirectional transformation.
 \end{enumerate}
 
 The source code is defined in a restricted sub-language of Java 1.4. The EMF metamodel of the PG is provided in the case description. The case considers two refactoring operations:
 
-\begin{itemize}
-\item \textsf{Pull Up Method}
-\item \textsf{Create Superclass}
+\begin{itemize}[noitemsep]
+\item \ttcsf{Pull Up Method}
+\item \ttcsf{Create Superclass}
 \end{itemize}
 
 \section{Implementation}
 
-The source code of the solution is available as an open-source project.\footnote{\url{https://github.com/FTSRG/java-refactoring-ttc-viatra}}
+The solution was developed partly in IntelliJ IDEA and partly in the Eclipse IDE. The projects are not tied to the any development environment and can be compiled with the Apache Maven~\cite{Maven} build automation tool. This offers a number of benefits, including easy portability and the possibility of continuous integration.
 
-The solution was developed in the Eclipse IDE. For setting up the development environment, please refer to the readme file. The projects are not tied to the Eclipse environment and can be compiled with the Apache Maven~\cite{Maven} build automation tool. This offers a number of benefits, including easy portability and the possibility of continuous integration.
-
-The solution is written in Java~8 and Xtend~\cite{Xtend}.
-
-\todo[inline]{ide kellene egy abra sorszamokkal, amikre lehet hivatkozni a kovetkezokben}
+The code is written in Java~8 and Xtend~\cite{Xtend}. For developing the Xtend code and editing the graph patterns, it is required to use the Eclipse IDE. For setting up the IDE, please refer to the readme file. 
 
 \subsection{Parsing the Source Code to the ASG}
 
-The solution uses the parser of Eclipse Java Development Tools~\cite{jdt}, which is also used in the Eclipse Java IDE. The parser generates the Abstract Syntax Graph (ASG) from the provided source code files.
+\todo[inline]{ide kellene egy abra sorszamokkal, amikre lehet hivatkozni a kovetkezokben}
 
 \ttcfig{pg}{Caption}{0.6}
+
+The solution uses the parser of Eclipse Java Development Tools~\cite{jdt}, which is also used in the Eclipse Java IDE. Compared the MoDisco framework~\cite{MoDisco} (which also builds on JDT), we found JDT to be simpler to deploy outside the Eclipse environment, \ie without defining an Eclipse workspace. Another alternative for parsing the source code would be JaMoPP~\cite{JaMoPP}. However, JaMoPP is only capable of parsing Java 1.5 source files. While this is not a problem when solving this case, we decided to stick to JDT as we already use it in various other projects. JDT is actively developed and hence supports the latest (1.8) version of the Java language. As JDT is frequently used to parse large source code repositories, it is carefully optimised and supports lazy loading. Unlike JaMoPP and MoDisco, JDT does not produce an EMF model.
+
+The JDT parser generates Abstract Syntax Trees (ASTs) from the provided source code files with optional binding resolution. This way, the syntax trees in the separate compilation units can be treated as an Abstract Syntax Graph (ASG).
 
 \ttcfig{trace-mm}{Metamodel of the trace model}{0.6}
 
@@ -96,7 +99,7 @@ The refactoring operations are implemented as model transformations on the PG. E
 
 \subsection{Transforming the ASG to Source Code}
 
-The ASG is transformed using JDT's \textsf{CompilationUnit.rewrite()} method which converts the changes of the abstract syntax graph to a set of text manipulation operations (\textsf{TextEdit} class).
+The ASG is transformed using JDT's \ttcsf{CompilationUnit.rewrite()} method which converts the changes of the abstract syntax graph to a set of text manipulation operations (\ttcsf{TextEdit} class).
 
 \section{Evaluation}
 
@@ -108,7 +111,7 @@ The benchmark were conducted on a 64-bit Arch Linux virtual machine running on S
 
 The paper presented a solution for the Java Refactoring case of the 2015 Transformation Tool Contest. The solution addresses both challenges (bidirectional synchrosiation and program refactoring) and both refactoring operations (pull up method, create superclass) defined in the case.
 
-The framework is flexible to allow the user to define new refactoring operations, \eg \textsf{Extract Class} or \textsf{Pull Up Field}.
+The framework is flexible to allow the user to define new refactoring operations, \eg \ttcsf{Extract Class} or \ttcsf{Pull Up Field}.
 
 \bibliographystyle{eptcs}
 \bibliography{ttc}
