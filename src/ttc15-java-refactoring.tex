@@ -30,8 +30,6 @@ This paper describes a solution for the TTC 2015 Java Refactoring Case. The sour
 
 The use of automated model transformations is a key factor in modern model-driven system engineering. Model transformations allow to query, derive and manipulate large industrial models, including models based on existing systems, \eg source code models created with reverse engineering techniques. Since such transformations are frequently integrated to modeling environments, they need to feature both high performance and a concise programming interface to support software engineers.
 
-Refactoring operations are often used in software engineering to improve the readability, maintainability of existing source code without altering the behaviour of the software.
-
 \subsection{\eiq}
 
 The objective of the \eiq~\cite{models2010, eiq-homepage} framework is to provide a declarative way to define queries over EMF models. \eiq extended the pattern language of \viatratwo with new features (including transitive closure, role navigation, match count) and tailored it to EMF models~\cite{iqpl}. While \eiq is developed with a focus on \emph{incremental query evaluation}, the latest version also provides a \emph{local search-based query evaluation} algorithm.
@@ -51,7 +49,7 @@ The current \viatra{} project is a full rewrite of the previous \viatratwo{} fra
 
 \section{Case Description}
 
-The goal of the Java Refactoring Case~\cite{ttc-refactoring-case} is to use model transformation tools to perform refactoring operations on Java source code. The main challenges of the case are the following:
+Refactoring operations are often used in software engineering to improve the readability, maintainability of existing source code without altering the behaviour of the software. The goal of the Java Refactoring Case~\cite{ttc-refactoring-case} is to use model transformation tools to refactor Java source code. The main challenges of the case are the following:
 
 \begin{enumerate}[noitemsep]
 \item Transforming the \emph{Java source code} to a \emph{program graph} (PG).
@@ -70,43 +68,46 @@ The source code is defined in a restricted sub-language of Java 1.4. The EMF met
 
 The solution was developed partly in IntelliJ IDEA and partly in the Eclipse IDE. The projects are not tied to the any development environment and can be compiled with the Apache Maven~\cite{Maven} build automation tool. This offers a number of benefits, including easy portability and the possibility of continuous integration.
 
-The code is written in Java~8 and Xtend~\cite{Xtend}. For developing the Xtend code and editing the graph patterns, it is required to use the Eclipse IDE. For setting up the IDE, please refer to the readme file. 
+The code is written in Java~8 and Xtend~\cite{Xtend}. The queries and transformations were defined in \eiq and \viatra, respectively. For developing the Xtend code and editing the graph patterns, it is required to use the Eclipse IDE. For setting up the IDE, please refer to the readme file. 
 
-\ttcfig{pg}{Workflow of the transformation}{0.7}
+\subsection{Java Development Tools}
 
-\subsection{Parsing the Source Code to the ASG}
+The solution requires a technology to parse the Java code to a program graph model. While the case mentions the JaMoPP~\cite{JaMoPP} and MoDisco~\cite{MoDisco} technologies, our solution builds on top of the Eclipse Java Development Tools (JDT)~\cite{jdt} used in the Eclipse Java IDE as we were already using JDT in other projects.
 
-The solution uses the parser of Eclipse Java Development Tools~\cite{jdt}, which is also used in the Eclipse Java IDE. Compared the MoDisco framework~\cite{MoDisco} (which also builds on JDT), we found JDT to be simpler to deploy outside the Eclipse environment, \ie without defining an Eclipse workspace. Another alternative for parsing the source code would be JaMoPP~\cite{JaMoPP}. However, JaMoPP is only capable of parsing Java 1.5 source files. While this is not a problem when solving this case, we decided to stick to JDT as we already use it in various other projects. JDT is actively developed and hence supports the latest (1.8) version of the Java language. As JDT is frequently used to parse large source code repositories, it is carefully optimised and supports lazy loading. Unlike JaMoPP and MoDisco, JDT does not produce an EMF model.
+Compared to the MoDisco framework (which also builds on JDT), we found JDT to be simpler to deploy outside the Eclipse environment, \ie without defining an Eclipse workspace.
+
+Meanwhile, the JaMoPP project has almost completely been abandoned and therefore it is only capable of parsing Java 1.5 source files. While this would not pose a problem for this case, we think it is best to use an actively developed technology such as JDT which supports the latest (1.8) version of the Java language. As JDT is frequently used to parse large source code repositories, it is carefully optimised and supports lazy loading. Unlike JaMoPP and MoDisco, JDT does not produce an EMF model.
 
 The JDT parser generates Abstract Syntax Trees (ASTs) from the provided source code files with optional binding resolution. This way, the syntax trees in the separate compilation units can be treated as an Abstract Syntax Graph (ASG).
 
-\ttcfig{trace-mm}{Metamodel of the trace model}{0.6}
+\subsection{Workflow of the Transformation}
 
-\subsection{Synchronising the ASG and the PG}
+\ttcfig{pg}{Workflow of the transformation}{0.8}
 
-As \viatra does not support bidirectional transformations, the JDT ASG--PG transformation was implemented as two separate transformations:
+\autoref{fig:pg} shows the workflow of the transformation. The framework receives the path to the directory containing the source files. Each source files is treated as a \emph{compilation unit} and parsed using JDT~\ttccircled{1} to ASTs. Using JDT's resolving mechanism, these ASTs can be connected to an ASG.
 
-\numcircledmod{1}
+As the JDT model does not support complex queries and traversal operations, the framework uses a visitor~\ttccircled{2} to perform a two-pass traversal on the ASG:
 
+\begin{enumerate}[noitemsep]
+\item For each object, the visitor creates the corresponding object(s) in the PG. The framework uses maps to store the mapping from the objects in the ASG to the objects in the PG.
+\item Using the maps populated in the previous step, the visitor creates the cross-references between the objects in the PG (\eg x and y objects).
+\end{enumerate}
 
-\begin{description}
-\item[JDT ASG to PG] As the JDT model does not support complex queries and traversal operations, we used the Visitor pattern to process the model.
-\item[PG to JDT ASG] For each transformation affecting the PG, we execute the appropriate actions to keep the ASG in sync.
-\end{description}
+To support efficient queries, we extended the program graph metamodel with a \emph{trace model}~(\autoref{fig:trace-mm}). The trace model is generated with a \viatra transformation (\ttccircled{3}, \ttccircled{4}).
 
-\subsection{Transforming the PG}
+The refactoring operations are implemented as model transformations on the JDT ASG and the PG. Each model transformation is defined in \viatra: the LHS is defined with an \eiq pattern and the RHS is defined with an imperative Xtend code. As \viatra does not support bidirectional transformations, for each transformation affecting the PG, we also execute the appropriate actions to keep the ASG in sync.
 
-The refactoring operations are implemented as model transformations on the PG. Each model transformation is defined in \viatra: the LHS is defined with an \eiq pattern and the RHS is defined with an imperative Xtend code.
+\ttcfig{trace-mm}{Metamodel of the trace model}{0.7}
 
 \subsection{Transforming the ASG to Source Code}
 
-The ASG is transformed using JDT's \ttcsf{CompilationUnit.rewrite()} method which converts the changes of the abstract syntax graph to a set of text manipulation operations (\ttcsf{TextEdit} class).
+The changes in the ASG are propagated to the source code~\ttccircled{5}. The ASG is transformed using JDT's \ttcsf{CompilationUnit.rewrite()} method which converts the changes of the abstract syntax graph to a set of text manipulation operations (\ttcsf{TextEdit} class).
 
 \section{Evaluation}
 
-The benchmark were conducted on a 64-bit Arch Linux virtual machine running on SHARE.\footnote{\url{https://is.ieis.tue.nl/staff/pvgorp/share/}}
+The benchmark were conducted on a 64-bit Ubuntu Linux machine.
 
-\ttcfig{benchmark-results}{Benchmark results}{0.8}
+%\ttcfig{benchmark-results}{Benchmark results}{0.8}
 
 \section{Summary}
 
