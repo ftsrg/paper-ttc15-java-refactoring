@@ -4,6 +4,9 @@
 \input{ttc15-commands.tex}
 \usepackage{enumitem}
 
+\newcommand{\pum}{\ttcsf{Pull Up Method}\@\xspace}
+\newcommand{\cscz}{\ttcsf{Create Superclass}\@\xspace}
+
 % metadata
 \title{Java Refactoring Case: a \viatra Solution\thanks{This work was partially supported by the MONDO (EU ICT-611125) project.}}
 \author{D\'{a}niel Stein \qquad G\'{a}bor Sz\'{a}rnyas \qquad \'{A}bel Heged\"{u}s \qquad Istv\'{a}n R\'{a}th
@@ -28,7 +31,7 @@ This paper describes a solution for the TTC 2015 Java Refactoring Case. The sour
 
 \section{Preliminaries}
 
-The use of automated model transformations is a key factor in modern model-driven system engineering. Model transformations allow to query, derive and manipulate large industrial models, including models based on existing systems, \eg source code models created with reverse engineering techniques. Since such transformations are frequently integrated to modeling environments, they need to feature both high performance and a concise programming interface to support software engineers.
+The use of automated model transformations is a key factor in modern model-driven system engineering. Model transformations allow the users to query, derive and manipulate large industrial models, including models based on existing systems, \eg source code models created with reverse engineering techniques. Since such transformations are frequently integrated to modeling environments, they need to feature both high performance and a concise programming interface to support software engineers.
 
 \subsection{\eiq}
 
@@ -60,8 +63,8 @@ Refactoring operations are often used in software engineering to improve the rea
 The source code is defined in a restricted sub-language of Java 1.4. The EMF metamodel of the PG is provided in the case description. The case considers two refactoring operations:
 
 \begin{itemize}[noitemsep]
-\item \ttcsf{Pull Up Method}
-\item \ttcsf{Create Superclass}
+\item \pum
+\item \cscz
 \end{itemize}
 
 \section{Implementation}
@@ -123,8 +126,10 @@ The paper presented a solution for the Java Refactoring case of the 2015 Transfo
 \appendix
 \section{Appendix}
 
-\listingxtend{transformation.xtend}{Xtend code}
+\listingiqpl{pum.eiq}{Patterns for the \pum refactoring}
 
-\listingiqpl{pattern.eiq}{IQPL code}
+\listingiqpl{csc.eiq}{Patterns for the \cscz refactoring}
+
+\listingxtend{transformation.xtend}{Xtend code}
 
 \end{document}

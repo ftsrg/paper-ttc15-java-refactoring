@@ -1,0 +1,67 @@
+pattern possiblePUM(parentClass : TClass, methodSignatureTrace : MethodSignatureTrace) {
+	MethodSignatureTrace.tMethodSignature(methodSignatureTrace, methodSignature);
+	N == count find childClassesWithSignature(parentClass, _, methodSignature);
+	M == count find childClasses(parentClass, _);
+
+	check(N == M && N != 0); // every child class has the method signature
+	neg find classWithSignature(parentClass, methodSignature); // parent does not have this method
+	
+	neg find childrenClassMethodDefinitionsAccessingSiblingMembers(childClass, methodSignature);
+}
+
+pattern childClasses(parentClass : TClass, childClass : TClass) {
+	TClass.childClasses(parentClass, childClass);
+}
+
+pattern childClassesWithSignature(parentClass : TClass, clazz : TClass, methodSignature : TMethodSignature) {
+	TClass(parentClass);
+	TClass.childClasses(parentClass, clazz);
+	
+	find classWithSignature(clazz, methodSignature);
+}
+
+pattern classWithSignature(clazz : TClass, methodSignature : TMethodSignature) {
+	TClass(clazz);
+	TMethodSignature(methodSignature);
+	TMethodSignature.definitions(methodSignature, methodDefinition);
+	TClass.defines(clazz, methodDefinition);
+}
+
+pattern methodDefinitionInClass(clazz : TClass, methodSignature : TMethodSignature, methodDefinition : TMethodDefinition) {
+	TMethodSignature.definitions(methodSignature, methodDefinition);
+	TClass.defines(clazz, methodDefinition);
+}
+
+pattern classWithName(tClass : TClass, className) {
+	TClass.tName(tClass, className);
+}
+
+pattern methodWithSignature(trace : MethodSignatureTrace, signature) {
+	MethodSignatureTrace.signatureString(trace, signature);
+}
+
+// patterns for PG refactor
+
+pattern methodDefinitionInClassList(parentClass : TClass, methodSignature : TMethodSignature, clazz : TClass, methodDefinition : TMethodDefinition) {
+	TClass.childClasses(parentClass, clazz);
+	TMethodSignature.definitions(methodSignature, methodDefinition);
+	TClass.defines(clazz, methodDefinition);
+}
+
+pattern methodsAccessingSiblingMembers(methodDefinition : TMethodDefinition) {
+	TMember.access(methodDefinition, accessedMember);
+	TClass.defines(tClass, methodDefinition);
+	TClass.defines(tClass, accessedMember);
+} or {
+	TClass.defines(tClass, methodDefinition);
+	TMember.access(methodDefinition, accessedMember);
+	TClass.defines(otherClass, accessedMember);
+	TClass.parentClass.childClasses(tClass, otherClass);
+}
+
+pattern childrenClassMethodDefinitionsAccessingSiblingMembers(parentClass : TClass, methodSignature : TMethodSignature) {
+	TClass.childClasses(parentClass, childClass);
+	TClass.defines(childClass, methodDefinition);
+	TMethodSignature.definitions(methodSignature, methodDefinition);
+	find methodsAccessingSiblingMembers(methodDefinition);
+}
