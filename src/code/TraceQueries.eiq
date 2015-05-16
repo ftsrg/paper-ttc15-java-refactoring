@@ -1,0 +1,12 @@
+package hu.bme.mit.ttc.refactoring.patterns
+
+import "platform:/plugin/TypeGraphBasic/model/TypeGraphBasic.ecore"
+
+pattern methodSignature(methodSignature) {
+	TMethodSignature(methodSignature);
+}
+
+pattern tClassName(tClass, className) {
+	TClass(tClass);
+	TClass.tName(tClass, className);
+}
