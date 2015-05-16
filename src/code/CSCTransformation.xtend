@@ -6,7 +6,7 @@ import TypeGraphBasic.TPackage
 import TypeGraphBasic.TypeGraph
 import TypeGraphBasic.TypeGraphBasicPackage
 import com.google.common.collect.BiMap
-import hu.bme.mit.ttc.refactoring.patterns.RefactoringQueries
+import hu.bme.mit.ttc.refactoring.patterns.CSCQueries
 import java.io.File
 import java.util.ArrayList
 import java.util.List
@@ -38,7 +38,7 @@ class CSCTransformation {
 	extension IModelManipulations manipulation
 
 	extension TypeGraphBasicPackage tgPackage = TypeGraphBasicPackage::eINSTANCE
-	extension RefactoringQueries queries = RefactoringQueries::instance
+	extension CSCQueries queries = CSCQueries::instance
 	
 	val AdvancedIncQueryEngine engine
 	val String concatSignature
@@ -87,7 +87,7 @@ class CSCTransformation {
 		serializeCUs
 		
 		
-		// --------------- ▲ JDT transformation --------------- PG transformation ▼ ---------------
+		// --------------- /\ JDT transformation ------------- PG transformation \/ ---------------
 		
 		val oldParentTClass = tClasses.get(0).parentClass
 		if (oldParentTClass != null) {
@@ -167,13 +167,10 @@ class CSCTransformation {
 			val types = (childCU.root as CompilationUnit).getStructuralProperty(CompilationUnit.TYPES_PROPERTY) as List<TypeDeclaration>
 			for (type : types) {
 				for (method : (type as TypeDeclaration).methods) {
-//					println(method.resolveBinding.key)
-//					println(methodSignature)
+					// match
 					if (method.resolveBinding.key.startsWith(methodSignature)) {
 						astMethodDeclarations += method
-//						println("MATCH")
 					}
-//					println
 				}
 			}
 		}
@@ -182,10 +179,8 @@ class CSCTransformation {
 	}
 	
 	protected def CompilationUnit createTargetClass(TypeDeclaration childClass, Type superClassType) {
-//		val ast = AST.newAST(AST.JLS8)
 		val ast = childClass.AST
 		val compilationUnit = ast.newCompilationUnit
-//		compilationUnit.recordModifications
 		
 		if (targetPackage != null) {
 			val packageDeclaration = ast.newPackageDeclaration
@@ -214,7 +209,6 @@ class CSCTransformation {
 		compilationUnit.types += typeDeclaration
 		
 		compilationUnit
-//		String targetSignature = "L" + target.getPackage().replace('.', '/') + "/" + target.getClass_name() + ";";
 	}
 	
 	protected def insertMethodDeclaration(MethodDeclaration declaration) {
@@ -240,7 +234,6 @@ class CSCTransformation {
 			fqn = ast.newSimpleType(ast.newSimpleName(targetName))
 		}
 		
-//		println(fqn)
 		for (declaration : typeDeclarations) {
 			declaration.superclassType = ASTNode.copySubtree(declaration.AST, fqn) as Type
 		}
@@ -285,7 +278,6 @@ class CSCTransformation {
 			return false
 		}
 		
-		// TODO get the method signature by string, then get one arbitrary match with it bound
 		engine.getMatcher(possibleCSC).countMatches > 0
 	}
 	

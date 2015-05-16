@@ -4,7 +4,7 @@ import TypeGraphBasic.TClass
 import TypeGraphBasic.TypeGraphBasicPackage
 import TypeGraphTrace.MethodSignatureTrace
 import com.google.common.collect.BiMap
-import hu.bme.mit.ttc.refactoring.patterns.RefactoringQueries
+import hu.bme.mit.ttc.refactoring.patterns.PUMQueries
 import java.io.File
 import java.util.ArrayList
 import java.util.List
@@ -33,7 +33,7 @@ class PUMTransformation {
 	extension IModelManipulations manipulation
 
 	extension TypeGraphBasicPackage tgPackage = TypeGraphBasicPackage::eINSTANCE
-	extension RefactoringQueries queries = RefactoringQueries::instance
+	extension PUMQueries queries = PUMQueries::instance
 	
 	val AdvancedIncQueryEngine engine
 	val String parentSignature
@@ -72,7 +72,7 @@ class PUMTransformation {
 		updateASTAndSerialize(astParentClass, astChildClasses, astMethodDeclarations)
 		
 		
-		// --------------- ▲ JDT transformation --------------- PG transformation ▼ ---------------
+		// --------------- /\ JDT transformation ------------- PG transformation \/ ---------------
 		
 		
 		val methodDefinitionsToDelete = engine.getMatcher(methodDefinitionInClassList).getAllMatches(
@@ -98,25 +98,6 @@ class PUMTransformation {
 		
 		println(tMethodDefinition)
 	].build
-	
-	def fire() {
-		fireAllCurrent(
-			PUMRule,
-			"parentClass.tName" -> parentSignature,
-			"MethodSignatureTrace.signatureString" -> methodSignature
-			)
-	}
-	
-	def canExecutePUM() {
-		// TODO get the method signature by string, then get one arbitrary match with it bound
-		val parentTClass = engine.getMatcher(classWithName).getOneArbitraryMatch(null, parentSignature)
-		val trace = engine.getMatcher(methodWithSignature).getOneArbitraryMatch(null, methodSignature)
-		
-		return
-		parentTClass != null &&
-		trace != null &&
-		engine.getMatcher(possiblePUM).getOneArbitraryMatch(parentTClass.TClass, trace.trace) != null
-	}
 	
 	protected def readFileToString(String path) {
 		new Scanner(new File(path)).useDelimiter("\\A").next
@@ -172,5 +153,24 @@ class PUMTransformation {
 				methodDeclaration.delete
 			}
 		}
+	}
+	
+		def fire() {
+		fireAllCurrent(
+			PUMRule,
+			"parentClass.tName" -> parentSignature,
+			"MethodSignatureTrace.signatureString" -> methodSignature
+			)
+	}
+	
+	def canExecutePUM() {
+		// get the method signature by string, then get one arbitrary match with it bound
+		val parentTClass = engine.getMatcher(classWithName).getOneArbitraryMatch(null, parentSignature)
+		val trace = engine.getMatcher(methodWithSignature).getOneArbitraryMatch(null, methodSignature)
+		
+		return
+		parentTClass != null &&
+		trace != null &&
+		engine.getMatcher(possiblePUM).getOneArbitraryMatch(parentTClass.TClass, trace.trace) != null
 	}
 }

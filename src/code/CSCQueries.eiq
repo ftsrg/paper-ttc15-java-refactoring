@@ -1,3 +1,13 @@
+package hu.bme.mit.ttc.refactoring.patterns
+
+import "platform:/plugin/TypeGraphBasic/model/TypeGraphBasic.ecore"
+import "platform:/plugin/TypeGraphBasic/model/TypeGraphTrace.ecore"
+
+/*
+ * Main decision pattern. If the preconditions are statisfied (the
+ * targetClass should not exist), the pattern returns its parameters, if:
+ *  - every child class has the same parent
+ */
 pattern possibleCSC(concatSignature, methodSignature : TMethodSignature) {
 	ClassListTrace.concatSignature(classListTrace, concatSignature);
 	ClassListTrace.tClasses.signature(classListTrace, methodSignature);
@@ -5,7 +15,7 @@ pattern possibleCSC(concatSignature, methodSignature : TMethodSignature) {
 	neg find childClassesWithDifferentParents(classListTrace, _, _);
 }
 
-pattern childClassesWithDifferentParents(classListTrace : ClassListTrace, classOne : TClass, classTwo : TClass){
+pattern childClassesWithDifferentParents(classListTrace : ClassListTrace, classOne : TClass, classTwo : TClass){//, parentClassOne : TClass, parentClassTwo : TClass) {
 	ClassListTrace.tClasses(classListTrace, classOne);
 	ClassListTrace.tClasses(classListTrace, classTwo);
 	find differentParents(classOne, classTwo);
@@ -29,20 +39,6 @@ pattern hasParent(tClass : TClass) {
 	TClass.parentClass(tClass, _);
 }
 
-pattern childClassesWithoutGivenMethodSignature(classListTrace : ClassListTrace, methodSignature : TMethodSignature, childClass : TClass) {
-	ClassListTrace(classListTrace);
-	ClassListTrace.tClasses(classListTrace, childClass);
-	
-	ClassListTrace.tClasses(classListTrace, childClassFixed);
-	TClass.signature(childClassFixed, methodSignature);
-	
-	neg find childClassWithMethodSignature(childClass, methodSignature);
-}
-
-pattern childClassWithMethodSignature(childClass : TClass, methodSignature : TMethodSignature) {
-	TClass.signature(childClass, methodSignature);
-}
-
 pattern classesOfClassListTrace(concatSignature, tClass : TClass) {
 	ClassListTrace.concatSignature(classListTrace, concatSignature);
 	ClassListTrace.tClasses(classListTrace, tClass);
@@ -52,30 +48,17 @@ pattern methodSignatureAndTrace(trace : MethodSignatureTrace, methodSignature : 
 	MethodSignatureTrace.tMethodSignature(trace, methodSignature);
 }
 
+// pattern for PG refactor
 pattern packageWithName(tPackage : TPackage, packageName) {
 	TPackage.tName(tPackage, packageName);
 }
 
+// pattern for PG refactor
 pattern typeGraphs(typeGraph : TypeGraph) {
 	TypeGraph(typeGraph);
 }
 
-pattern methodsAccessingListSiblingMembers(classListTrace : ClassListTrace, methodDefinition : TMethodDefinition) {
-	TMember.access(methodDefinition, accessedMember);
-	TClass.defines(tClass, methodDefinition);
-	TClass.defines(tClass, accessedMember);
-	ClassListTrace.tClasses(classListTrace, tClass);
-} or {
-	TClass.defines(tClass, methodDefinition);
-	TClass.defines(otherClass, accessedMember);
-	TMember.access(methodDefinition, accessedMember);
-	ClassListTrace.tClasses(classListTrace, tClass);
-	ClassListTrace.tClasses(classListTrace, otherClass);
-}
-
-pattern listedClassMethodDefinitionsAccessingListSiblingMembers(classListTrace : ClassListTrace, methodSignature : TMethodSignature) {
-	ClassListTrace.tClasses(classListTrace, childClass);
-	TClass.defines(childClass, methodDefinition);
-	TMethodSignature.definitions(methodSignature, methodDefinition);
-	find methodsAccessingListSiblingMembers(classListTrace, methodDefinition);
+// fire precondition pattern
+pattern classWithName(tClass : TClass, className) {
+	TClass.tName(tClass, className);
 }

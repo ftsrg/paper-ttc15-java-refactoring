@@ -1,11 +1,28 @@
+package hu.bme.mit.ttc.refactoring.patterns
+
+import "platform:/plugin/TypeGraphBasic/model/TypeGraphBasic.ecore"
+import "platform:/plugin/TypeGraphBasic/model/TypeGraphTrace.ecore"
+
+/*
+ * Main decision pattern. If the preconditions are statisfied (parentClass
+ * and methodSignatureTrace can be bound as parameters), the pattern returns
+ * its parameters, if:
+ *  - every child class has a method with the given signature (N = M)
+ *  - the parent class does not have it already
+ *  - the transformation will not create unavailable access
+ */
 pattern possiblePUM(parentClass : TClass, methodSignatureTrace : MethodSignatureTrace) {
 	MethodSignatureTrace.tMethodSignature(methodSignatureTrace, methodSignature);
+	
+	// every child class has the method signature
 	N == count find childClassesWithSignature(parentClass, _, methodSignature);
 	M == count find childClasses(parentClass, _);
-
-	check(N == M && N != 0); // every child class has the method signature
-	neg find classWithSignature(parentClass, methodSignature); // parent does not have this method
+	check(N == M && N != 0);
 	
+	// parent does not already have this method
+	neg find classWithSignature(parentClass, methodSignature);
+	
+	// the fields and methods will still be accessible after PUM
 	neg find childrenClassMethodDefinitionsAccessingSiblingMembers(childClass, methodSignature);
 }
 
@@ -27,27 +44,6 @@ pattern classWithSignature(clazz : TClass, methodSignature : TMethodSignature) {
 	TClass.defines(clazz, methodDefinition);
 }
 
-pattern methodDefinitionInClass(clazz : TClass, methodSignature : TMethodSignature, methodDefinition : TMethodDefinition) {
-	TMethodSignature.definitions(methodSignature, methodDefinition);
-	TClass.defines(clazz, methodDefinition);
-}
-
-pattern classWithName(tClass : TClass, className) {
-	TClass.tName(tClass, className);
-}
-
-pattern methodWithSignature(trace : MethodSignatureTrace, signature) {
-	MethodSignatureTrace.signatureString(trace, signature);
-}
-
-// patterns for PG refactor
-
-pattern methodDefinitionInClassList(parentClass : TClass, methodSignature : TMethodSignature, clazz : TClass, methodDefinition : TMethodDefinition) {
-	TClass.childClasses(parentClass, clazz);
-	TMethodSignature.definitions(methodSignature, methodDefinition);
-	TClass.defines(clazz, methodDefinition);
-}
-
 pattern methodsAccessingSiblingMembers(methodDefinition : TMethodDefinition) {
 	TMember.access(methodDefinition, accessedMember);
 	TClass.defines(tClass, methodDefinition);
@@ -64,4 +60,21 @@ pattern childrenClassMethodDefinitionsAccessingSiblingMembers(parentClass : TCla
 	TClass.defines(childClass, methodDefinition);
 	TMethodSignature.definitions(methodSignature, methodDefinition);
 	find methodsAccessingSiblingMembers(methodDefinition);
+}
+
+// fire precondition pattern
+pattern classWithName(tClass : TClass, className) {
+	TClass.tName(tClass, className);
+}
+
+// fire precondition pattern
+pattern methodWithSignature(trace : MethodSignatureTrace, signature) {
+	MethodSignatureTrace.signatureString(trace, signature);
+}
+
+// pattern for PG refactor
+pattern methodDefinitionInClassList(parentClass : TClass, methodSignature : TMethodSignature, clazz : TClass, methodDefinition : TMethodDefinition) {
+	TClass.childClasses(parentClass, clazz);
+	TMethodSignature.definitions(methodSignature, methodDefinition);
+	TClass.defines(clazz, methodDefinition);
 }
