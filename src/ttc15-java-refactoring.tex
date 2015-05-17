@@ -9,11 +9,11 @@
 
 % metadata
 \title{Java Refactoring Case: a \viatra Solution\thanks{This work was partially supported by the MONDO (EU ICT-611125) project.}}
-\author{D\'{a}niel Stein \qquad G\'{a}bor Sz\'{a}rnyas \qquad \'{A}bel Heged\"{u}s \qquad Istv\'{a}n R\'{a}th
+\author{D\'{a}niel Stein \qquad G\'{a}bor Sz\'{a}rnyas \qquad Istv\'{a}n R\'{a}th
 \institute{Budapest University of Technology and Economics\\
 Department of Measurement and Information Systems\\
 H-1117 Magyar tud\'{o}sok krt. 2, Budapest, Hungary}
-\email{daniel.stein@inf.mit.bme.hu, \{szarnyas, abel.hegedus, rath\}@mit.bme.hu}
+\email{daniel.stein@inf.mit.bme.hu, \{szarnyas, rath\}@mit.bme.hu}
 }
 \def\titlerunning{Java Refactoring Case: a VIATRA Solution}
 \def\authorrunning{D. Stein et al.}
@@ -27,7 +27,7 @@ This paper presents a solution for the Java Refactoring Case of the 2015 Transfo
 
 \section{Introduction}
 
-This paper describes a solution for the extended version of the TTC 2015 Java Refactoring Case. The source code of the solution is available as an open-source project.\footnote{\url{https://github.com/FTSRG/java-refactoring-ttc-viatra}} There is also a SHARE image available.\footnote{\url{http://is.ieis.tue.nl/staff/pvgorp/share/?page=ConfigureNewSession&vdi=.vdi}}\todo{SHARE URL}
+This paper describes a solution for the extended version of the TTC 2015 Java Refactoring Case. The source code of the solution is available as an open-source project.\footnote{\url{https://github.com/FTSRG/java-refactoring-ttc-viatra}} There is also a SHARE image available.\footnote{\url{http://is.ieis.tue.nl/staff/pvgorp/share/?page=ConfigureNewSession&vdi=ArchLinux64_java-refactoring-viatra.vdi}}
 
 The use of automated model transformations is a key factor in modern model-driven system engineering. Model transformations allow the users to query, derive and manipulate large industrial models, including models based on existing systems, \eg source code models created with reverse engineering techniques. Since such transformations are frequently integrated to modeling environments, they need to feature both high performance and a concise programming interface to support software engineers. \eiq and \viatra aim to provide an expressive query language and a carefully designed API for defining model queries and transformations.
 
@@ -91,36 +91,56 @@ The code is written in Java~8 and Xtend~\cite{Xtend}. The queries and transforma
 
 \ttcfig{pg}{Workflow of the transformation}{0.8}
 
-\autoref{fig:pg} shows the workflow of the transformation. The framework receives the path to the directory containing the source files. Each source file, every compilation unit is parsed into an AST of the ASG using JDT. is treated as a \emph{compilation unit} and parsed using JDT~\ttccircled{1} to ASTs. Using JDT's binding resolution mechanism, these ASTs are connected to an ASG.
+\autoref{fig:pg} shows the workflow of the transformation. The framework receives the path to the directory containing the source files. JDT treats each source file as a \emph{compilation unit}. Each file is parsed into an AST~\ttccircled{1} (technically, the root node of the AST is the compilation unit). Using JDT's binding resolution mechanism, these ASTs are connected to an ASG.
 
 As the JDT model does not support complex queries and traversal operations, the framework applies a visitor pattern to extract information resulting a two-pass traversal on the ASG \ttccircled{2}.
 
 \begin{enumerate}[noitemsep]
-\item For each object, the visitor creates the corresponding object(s) in the PG. The framework uses maps to store the mapping from the objects in the ASG to the objects in the PG.
+\item For each object, the visitor creates the corresponding object(s) in the PG. The framework uses maps to store the mapping from the objects in the ASG to the objects in the PG. The visitor also registers the connection 
+
+%ez csak részben igaz. egyrészt tárolja azt, hogy milyen jdt asg azonosítóhoz milyen pg eobject tartozik, de azt is, hogy milyen ASTNode milyen másik ASTNode-dal van x kapcsolatban és így lesznek a végén (finish()) összekötve. 
+%( mivel nem tudom, hogy a visitor minden sorrendben járja be az asg astk nodejait, így string alapján csinálok tracet. 
+%míg gráf esetén mindegy, hogy a hivatkozott node létezik-e már, az információ (kapcsolat) nem veszik el, itt amíg nincs eobject, nem tudnék rá hivatkozni) 
+
 \item Using the maps populated in the previous step, the visitor creates the cross-references between the objects in the PG (\eg x and y objects).
 \end{enumerate}
 
-To support efficient queries, we extended the program graph metamodel with a \emph{trace model}~(\autoref{fig:trace-mm}). The trace model defines traces for \ttcsf{MethodSignature}s and \ttcsf{ClassList}s.
+\subsection{Trace Model}
 
-The trace model is generated with a \viatra transformation (\ttccircled{3}, \ttccircled{4}).
+\ttcfig{trace-mm}{Metamodel of the trace model}{0.95}
+
+\eiq does not support collections as pattern parameters, \eg it is not possible to define a parameterized pattern which expects a list of classes as a parameter. To overcome this limitation, we extended the program graph metamodel with a \emph{trace model} shown in~\autoref{fig:trace-mm}. The trace model defines traces for method signatures and class lists:
+
+\begin{itemize}[noitemsep]
+\item \ttcsf{MethodSignatureTrace}: A method \ttcsf{method()} expecting a \ttcsf{String} and an \ttcsf{Integer} results in the \\ \ttctt{.method(Ljava/lang/String;I)} trace.
+\item \ttcsf{ClassListTrace}: A list of the \ttcsf{ChildClass1} and \ttcsf{ChildClass2} classes in the \ttcsf{example04} package results in the \ttctt{Lexample04/ChildClass1;\#Lexample04/ChildClass2;} trace.
+\end{itemize}
+
+The trace model is generated with a \viatra transformation (\autoref{lst:TraceTransformation.xtend}) using \eiq patterns (\autoref{lst:TraceQueries.eiq}).
+
+\subsection{Refactoring}
 
 The refactoring operations are implemented as model transformations on the JDT ASG and the PG. Each model transformation is defined in \viatra: the LHS is defined with an \eiq pattern and the RHS is defined with an imperative Xtend code. As \viatra does not support bidirectional transformations, for each transformation on the PG, we also execute the appropriate actions on the ASG to keep the two graphs in sync.
 
-\ttcfig{trace-mm}{Metamodel of the trace model}{1}
-
 \subsection{Transforming the ASG to Source Code}
 
-The changes in the ASG are propagated to the source code~\ttccircled{5}. The ASG is transformed using JDT's \ttcsf{CompilationUnit.rewrite()} method which converts the changes of the abstract syntax graph to a set of text manipulation operations (\ttcsf{TextEdit} class).
+%kell ez ilyen részletesen? Amúgy ide lehet írni, hog y azért jó a JDT, mert formázást lehetőleg tartva, inkrementálisan (?) frissíti a tartalmat. Mivel nem Eclipse környezetben vagyunk, ezért a fájl mentése során nem inkrementális a fájl módosítása. 
+
+The changes in the ASG are propagated to the source code~\ttccircled{5}. JDT is capable of incrementally maintaining each source code file on the changes in its AST.\footnote{The \textsf{CompilationUnit.rewrite()} method returns a set of text manipulation operations in the form of a \textsf{TextEdit} class.}
 
 \section{Evaluation}
 
-The benchmarks were conducted on a 64-bit Ubuntu Linux machine.
+The benchmarks were conducted on SHARE, running a 64-bit Arch Linux virtual machine. The machine utilized a single core of a 2.00~GHz Xeon E5-2650 CPU and 1~GB of RAM. We used OpenJDK~8 to run ARTE framework and the solution.
+
+
 
 %\ttcfig{benchmark-results}{Benchmark results}{0.8}
 
 \section{Summary}
 
 The paper presented a solution for the Java Refactoring case of the 2015 Transformation Tool Contest. The solution addresses both challenges (bidirectional synchrosiation and program refactoring) and both refactoring operations (pull up method, create superclass) defined in the case. The framework is flexible enough to allow the user to define new refactoring operations, \eg \ttcsf{Extract Class} or \ttcsf{Pull Up Field}.
+
+\paragraph{Acknowledgements.} The authors would like to thank Ábel Hegedüs, Oszkár Semeráth and Zoltán Ujhelyi for providing valuable insights into \eiq and \viatra.
 
 \bibliographystyle{eptcs}
 \bibliography{ttc}
