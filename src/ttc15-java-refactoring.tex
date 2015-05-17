@@ -132,13 +132,37 @@ The changes in the ASG are propagated to the source code~\ttccircled{5}. JDT is 
 
 The benchmarks were conducted on SHARE, running a 64-bit Arch Linux virtual machine. The machine utilized a single core of a 2.00~GHz Xeon E5-2650 CPU and 1~GB of RAM. We used OpenJDK~8 to run ARTE framework and the solution.
 
+\begin{table}
+\centering
+\footnotesize
+\begin{tabular}{| l | r |}
+\hline
+\bf test case & \bf time [s]\\\hline\hline
+\sf pub\_pum1\_1\_paper1 & 0.463 \\\hline
+\sf pub\_pum1\_2 & 0.013 \\\hline
+\sf pub\_pum2\_1 & 0.333 \\\hline
+\sf pub\_pum3\_1 & 0.094 \\\hline
+\sf pub\_csc1\_1 & 0.189 \\\hline
+\sf pub\_csc1\_2 & 0.093 \\\hline
+\sf hidden\_pum1\_1 & 0.063 \\\hline
+\sf hidden\_pum1\_2 & 0.013 \\\hline
+\sf hidden\_pum2\_1 & 0.114 \\\hline
+\sf hidden\_pum2\_2 & 0.082 \\\hline
+\sf hidden\_csc1\_1 & 0.081 \\\hline
+\sf hidden\_csc1\_2 & 0.007 \\\hline
+\sf hidden\_csc2\_1 & 0.058 \\\hline
+\sf hidden\_csc3\_1a & 0.189 \\\hline
+\sf hidden\_csc3\_1 & 0.179 \\\hline
 
+\end{tabular}\caption{Execution times for the test cases.}
+\label{tab:execution-times}
+\end{table}
 
-%\ttcfig{benchmark-results}{Benchmark results}{0.8}
+The execution times of the test cases are listed in~\autoref{tab:execution-times}. The results show that the solution is complete as all public and hidden test cases have been executed successfully. As the test cases only contained small examples, we cannot draw conclusions on the performance of the solution. However, it is worth noting that all test cases executed in less than half a second.
 
 \section{Summary}
 
-The paper presented a solution for the Java Refactoring case of the 2015 Transformation Tool Contest. The solution addresses both challenges (bidirectional synchrosiation and program refactoring) and both refactoring operations (pull up method, create superclass) defined in the case. The framework is flexible enough to allow the user to define new refactoring operations, \eg \ttcsf{Extract Class} or \ttcsf{Pull Up Field}.
+This paper presented a solution for the Java Refactoring case of the 2015 Transformation Tool Contest. The solution addresses both challenges (bidirectional synchrosiation and program refactoring) and both refactoring operations (pull up method, create superclass) defined in the case. The framework is flexible enough to allow the user to define new refactoring operations, \eg \ttcsf{Extract Class} or \ttcsf{Pull Up Field}.
 
 \paragraph{Acknowledgements.} The authors would like to thank Ábel Hegedüs, Oszkár Semeráth and Zoltán Ujhelyi for providing valuable insights into \eiq and \viatra.
 
