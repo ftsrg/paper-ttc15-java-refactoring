@@ -27,11 +27,32 @@ This paper presents a solution for the Java Refactoring Case of the 2015 Transfo
 
 \section{Introduction}
 
-This paper describes a solution for the TTC 2015 Java Refactoring Case. The source code of the solution is available as an open-source project.\footnote{\url{https://github.com/FTSRG/java-refactoring-ttc-viatra}} There is also a SHARE image available.\footnote{\url{http://is.ieis.tue.nl/staff/pvgorp/share/?page=ConfigureNewSession&vdi=.vdi}}\todo{SHARE URL}
+This paper describes a solution for the extended version of the TTC 2015 Java Refactoring Case. The source code of the solution is available as an open-source project.\footnote{\url{https://github.com/FTSRG/java-refactoring-ttc-viatra}} There is also a SHARE image available.\footnote{\url{http://is.ieis.tue.nl/staff/pvgorp/share/?page=ConfigureNewSession&vdi=.vdi}}\todo{SHARE URL}
 
-\section{Preliminaries}
+The use of automated model transformations is a key factor in modern model-driven system engineering. Model transformations allow the users to query, derive and manipulate large industrial models, including models based on existing systems, \eg source code models created with reverse engineering techniques. Since such transformations are frequently integrated to modeling environments, they need to feature both high performance and a concise programming interface to support software engineers. \eiq and \viatra aim to provide an expressive query language and a carefully designed API for defining model queries and transformations.
 
-The use of automated model transformations is a key factor in modern model-driven system engineering. Model transformations allow the users to query, derive and manipulate large industrial models, including models based on existing systems, \eg source code models created with reverse engineering techniques. Since such transformations are frequently integrated to modeling environments, they need to feature both high performance and a concise programming interface to support software engineers.
+\section{Case Description}
+
+Refactoring operations are often used in software engineering to improve the readability, maintainability of existing source code without altering the behaviour of the software. The goal of the Java Refactoring Case~\cite{ttc-refactoring-case} is to use model transformation tools to refactor Java source code. We decided to solve the extended version of the case. For this, the solution has to tackle the following challenges:
+
+\begin{enumerate}[noitemsep]
+\item Transforming the \emph{Java source code} to a \emph{program graph} (PG).
+\item Performing the refactoring transformation on the program graph.
+\item Synchronising the source code and the program graph.
+\end{enumerate}
+
+The source code is defined in a restricted sub-language of Java 1.4. The EMF metamodel of the PG is provided in the case description. The case considers two basic refactoring operations:
+
+\begin{itemize}[noitemsep]
+\item \pum
+\item \cscz
+\end{itemize}
+
+The solution is tested in an automated test framework, ARTE (Automated Refactoring Test Environment). ARTE runs a set of test cases, each consisting of a source code projects and refactoring operations to check the correctness and the performance of the solution.
+
+\section{Technologies}
+
+Solving the case requires the integration of a model transformation tool and a Java source code parser. In this section, we introduce the technologies used in our solution.
 
 \subsection{\eiq}
 
@@ -45,58 +66,41 @@ The \viatra framework supports the development of model transformations with spe
 	\item An internal DSL over the \xtend~\cite{Xtend} language to specify both batch and event-driven, reactive transformations.
 	\item A complex event-processing engine over EMF models to specify reactions upon detecting complex sequences of events.
 	\item A rule-based design space exploration framework to explore design candidates as models satisfying multiple criteria.
-	\item A model obfuscator to remove sensitive information from a confidential model (\eg to create bug reports).
+	\item A model obfuscator to remove sensitive information from a confidential model, \eg for creating bug reports.
 \end{itemize}
 
 The current \viatra{} project is a full rewrite of the previous \viatratwo{} framework, now with full compatibility and support for EMF models. The history of the \viatra{} family is described in~\cite{viatra-history}.
 
-\section{Case Description}
+\subsection{Java Development Tools}
 
-Refactoring operations are often used in software engineering to improve the readability, maintainability of existing source code without altering the behaviour of the software. The goal of the Java Refactoring Case~\cite{ttc-refactoring-case} is to use model transformation tools to refactor Java source code. The main challenges of the case are the following:
+The solution requires a technology to parse the Java code into a program graph model and serialize the modified graph model back to source code. While the case description mentions the JaMoPP~\cite{JaMoPP} and MoDisco~\cite{MoDisco} technologies, our solution builds on top of the Eclipse Java Development Tools (JDT)~\cite{jdt} used in the Eclipse Java IDE as we were already using JDT in other projects.
 
-\begin{enumerate}[noitemsep]
-\item Transforming the \emph{Java source code} to a \emph{program graph} (PG).
-\item Performing the refactoring transformation on the program graph.
-\item Synchronising the source code and the program graph using a bidirectional transformation.
-\end{enumerate}
+Compared to the MoDisco framework (which uses JDT internally), we found JDT to be simpler to deploy outside the Eclipse environment, \ie without defining an Eclipse workspace. Meanwhile, the JaMoPP project has almost completely been abandoned and therefore it is only capable of parsing Java 1.5 source files. While this would not pose a problem for this case, we think it is best to use an actively developed technology such as JDT which supports the latest (1.8) version of the Java language. As JDT is frequently used to parse large source code repositories, it is carefully optimised and supports lazy loading. Unlike JaMoPP and MoDisco, JDT does not produce an EMF model.
 
-The source code is defined in a restricted sub-language of Java 1.4. The EMF metamodel of the PG is provided in the case description. The case considers two refactoring operations:
+The JDT parser generates Abstract Syntax Trees (ASTs) from the provided source code files with an optional binding resolution mechanism. This way, the separate syntax trees can be connected to an Abstract Syntax Graph (ASG).
 
-\begin{itemize}[noitemsep]
-\item \pum
-\item \cscz
-\end{itemize}
+
 
 \section{Implementation}
 
 The solution was developed partly in IntelliJ IDEA and partly in the Eclipse IDE. The projects are not tied to the any development environment and can be compiled with the Apache Maven~\cite{Maven} build automation tool. This offers a number of benefits, including easy portability and the possibility of continuous integration.
 
-The code is written in Java~8 and Xtend~\cite{Xtend}. The queries and transformations were defined in \eiq and \viatra, respectively. For developing the Xtend code and editing the graph patterns, it is required to use the Eclipse IDE. For setting up the IDE, please refer to the readme file. 
-
-\subsection{Java Development Tools}
-
-The solution requires a technology to parse the Java code to a program graph model and serialize the refactored model to source code. While the case description mentions the JaMoPP~\cite{JaMoPP} and MoDisco~\cite{MoDisco} technologies, our solution builds on top of the Eclipse Java Development Tools (JDT)~\cite{jdt} used in the Eclipse Java IDE as we were already using JDT in other projects.
-
-Compared to the MoDisco framework (which uses JDT internally), we found JDT to be simpler to deploy outside the Eclipse environment, \ie without defining an Eclipse workspace.
-
-Meanwhile, the JaMoPP project has almost completely been abandoned and therefore it is only capable of parsing Java 1.5 source files. While this would not pose a problem for this case, we think it is best to use an actively developed technology such as JDT which supports the latest (1.8) version of the Java language. As JDT is frequently used to parse large source code repositories, it is carefully optimised and supports lazy loading. Unlike JaMoPP and MoDisco, JDT does not produce an EMF model.
-
-The JDT parser generates Abstract Syntax Trees (ASTs) from the provided source code files with an optional binding resolution mechanism. This way, the separate syntax trees can be connected to an Abstract Syntax Graph (ASG).
+The code is written in Java~8 and Xtend~\cite{Xtend}. The queries and transformations were defined in \eiq and \viatra, respectively. For developing the Xtend code and editing the graph patterns, it is required to use the Eclipse IDE. For setting up the development environment, please refer to the readme file. 
 
 \subsection{Workflow of the Transformation}
 
 \ttcfig{pg}{Workflow of the transformation}{0.8}
 
-\autoref{fig:pg} shows the workflow of the transformation. The framework receives the path to the directory containing the source files. Each source files is treated as a \emph{compilation unit} and parsed using JDT~\ttccircled{1} to ASTs. Using JDT's binding resolution mechanism, these ASTs are connected to an ASG.
+\autoref{fig:pg} shows the workflow of the transformation. The framework receives the path to the directory containing the source files. Each source file, every compilation unit is parsed into an AST of the ASG using JDT. is treated as a \emph{compilation unit} and parsed using JDT~\ttccircled{1} to ASTs. Using JDT's binding resolution mechanism, these ASTs are connected to an ASG.
 
-As the JDT model does not support complex queries and traversal operations, the framework uses a visitor~\ttccircled{2} to perform a two-pass traversal on the ASG:
+As the JDT model does not support complex queries and traversal operations, the framework applies a visitor pattern to extract information resulting a two-pass traversal on the ASG \ttccircled{2}.
 
 \begin{enumerate}[noitemsep]
 \item For each object, the visitor creates the corresponding object(s) in the PG. The framework uses maps to store the mapping from the objects in the ASG to the objects in the PG.
 \item Using the maps populated in the previous step, the visitor creates the cross-references between the objects in the PG (\eg x and y objects).
 \end{enumerate}
 
-To support efficient queries, we extended the program graph metamodel with a \emph{trace model}~(\autoref{fig:trace-mm}).  The trace model ...
+To support efficient queries, we extended the program graph metamodel with a \emph{trace model}~(\autoref{fig:trace-mm}). The trace model defines traces for \ttcsf{MethodSignature}s and \ttcsf{ClassList}s.
 
 The trace model is generated with a \viatra transformation (\ttccircled{3}, \ttccircled{4}).
 
