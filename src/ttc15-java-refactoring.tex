@@ -112,7 +112,7 @@ These maps provide trace information between the JDT model and the partially bui
 \item \ttcsf{MethodSignatureTrace.} Java methods are uniquely identifiable by their signature. The basic PG metamodel contains a \ttcsf{TMethodSignature} class, which only identifies itself with the name of the method (using a relation to the \ttcsf{TMethod} object) and the list of its parameter types.
 
 To support querying \ttcsf{TMethodSignature} objects with \eiq, we created a trace reference for each of them identified by their partial\footnote{The complete signature would also contain the defining type (class or interface) signature and the return type signature.} method signature. For example, a method \ttcsf{method()} expecting a \ttcsf{String} and an \ttcsf{Integer} will have the \ttctt{.method(Ljava/lang/String;I)} trace signature.
-\item \ttcsf{ClassListTrace.} To express the collection of classes, a \ttcsf{ClassListTrace} object will identify them with their signatures joined by the \ttctt{\#} character. For example, a list of the \ttcsf{ChildClass1} and \ttcsf{ChildClass2} classes in the \ttcsf{example04} package have the \ttctt{Lexample04/ChildClass1;\#Lexample04/ChildClass2;} trace signature.
+\item \ttcsf{ClassListTrace.} To express the collection of classes, a \ttcsf{ClassListTrace} object will identify them with their signatures joined by the \ttctt{\#} character. For example, a list of the \ttcsf{ChildClass1} and \ttcsf{ChildClass2} classes in the \ttcsf{example04} package has the \ttctt{Lexample04/ChildClass1;\#Lexample04/ChildClass2;} trace signature.
 \end{itemize}
 
 After the PG is produced, it is extended with the trace model. The traces are based on \eiq patterns (\autoref{lst:TraceQueries.eiq}) and generated with a \viatra transformation (\autoref{lst:TraceTransformation.xtend}).
@@ -121,7 +121,7 @@ The \emph{universal quantifier} is implemented as a double negation of the exist
 
 \subsection[Refactoring]{Refactoring\qquad\ttccircled{3}\ttccircled{4}}
 
-The refactoring operations are implemented as model transformations on the JDT ASG and the PG. Each model transformation is defined in \viatra: the LHS is defined with an \eiq pattern and the RHS is defined with imperative Xtend code. As \viatra does not support bidirectional transformations, for each transformation on the PG, we also execute the appropriate actions on the ASG to keep the two graphs in sync.
+The refactoring operations are implemented as model transformations on the JDT ASG and the PG. Each model transformation is defined in \viatra: the LHS is defined with an \eiq pattern and the RHS is defined with imperative Xtend code. As \viatra does not support bidirectional transformations, for each transformation on the PG, we also execute the corresponding actions on the ASG to keep the two graphs in sync.
 
 \subsubsection{Pull Up Method}
 After creating the method signature traces, the following preconditions must be satisfied before pulling up a method:
