@@ -91,34 +91,40 @@ The code is written in Java~8 and Xtend~\cite{Xtend}. The queries and transforma
 
 \ttcfig{pg}{Workflow of the transformation}{0.8}
 
-\autoref{fig:pg} shows the workflow of the transformation. The framework receives the path to the directory containing the source files. JDT treats each source file as a \emph{compilation unit}. Each file is parsed into an AST~\ttccircled{1} (technically, the root node of the AST is the compilation unit). Using JDT's binding resolution mechanism, these ASTs are connected to an ASG.
+\noindent\autoref{fig:pg} shows the workflow of the transformation. The workflow rougly consists of five steps: the source code is parsed into an ASG~\ttccircled{1}; a PG required for the extended case is produced~\ttccircled{2}; based on the PG the possible transformations are calculated~\ttccircled{3}; if needed, these transformations are executed~\ttccircled{4}; and finally the results of the transformations are serialized~\ttccircled{5}. In this section, we will discuss in detail how our solution executes the transformations.
 
-As the JDT model does not support complex queries and traversal operations, the framework applies a visitor pattern to extract information resulting a two-pass traversal on the ASG \ttccircled{2}.
+\subsection[Parsing the Source Code]{Parsing the Source Code\qquad\ttccircled{1}}
+The framework receives the path to the directory containing the source files. JDT parses these files and returns each file, each compilation unit parsed as an AST. These ASTs are interconnected, and using JDT's binding resolution mechanism, one can navigate from one AST to another AST.
+
+\subsection[Producing the Program Graph]{Producing the Program Graph\qquad\ttccircled{2}}
+Since JDT does not produce EMF models, it does not support such complex queries and traversal operations as the ones used on EMF models. To extract information and build the PG, our solution applies a visitor pattern resulting a two-pass traversal on the ASG.
 
 \begin{enumerate}[noitemsep]
-\item For each object, the visitor creates the corresponding object(s) in the PG. The framework uses maps to store the mapping from the objects in the ASG to the objects in the PG. The visitor also registers the connection 
+\item For each object, the visitor method creates the corresponding object(s) in the PG. Since the order of these visits is non-deterministic, the framework maintains maps to store the mapping from the objects in the ASG to the objects in the PG.
 
-%ez csak részben igaz. egyrészt tárolja azt, hogy milyen jdt asg azonosítóhoz milyen pg eobject tartozik, de azt is, hogy milyen ASTNode milyen másik ASTNode-dal van x kapcsolatban és így lesznek a végén (finish()) összekötve. 
-%( mivel nem tudom, hogy a visitor minden sorrendben járja be az asg astk nodejait, így string alapján csinálok tracet. 
-%míg gráf esetén mindegy, hogy a hivatkozott node létezik-e már, az információ (kapcsolat) nem veszik el, itt amíg nincs eobject, nem tudnék rá hivatkozni) 
+These maps provide trace information between the JDT model and the partially build PG. The visitor also collects the relations between JDT nodes and caches the unique identifiers of each connected node for every relation type. 
 
-\item Using the maps populated in the previous step, the visitor creates the cross-references between the objects in the PG (\eg x and y objects).
+\item After every compilation unit was parsed, the previously populated caches are used to create the cross-references between the objects in the PG (\eg \ttctt{TMember.access}).
 \end{enumerate}
 
-\subsection{Trace Model}
+\subsection[Extending the PG with the Trace Model]{Extending the PG with the Trace Model\qquad\ttccircled{2}\ttccircled{3}\ttccircled{4}}
 
 \ttcfig{trace-mm}{Metamodel of the trace model}{0.95}
 
-\eiq does not support collections as pattern parameters, \eg it is not possible to define a parameterized pattern which expects a list of classes as a parameter. To overcome this limitation, we extended the program graph metamodel with a \emph{trace model} shown in~\autoref{fig:trace-mm}. The trace model defines traces for method signatures and class lists:
+\noindent\eiq does not support collections as pattern parameters, \eg it is not possible to define a parameterized pattern which expects a list of classes as a parameter. To overcome this limitation, we extended the program graph metamodel with a \emph{trace model} shown in~\autoref{fig:trace-mm}. The trace model defines traces for method signatures and class lists:
 
 \begin{itemize}[noitemsep]
-\item \ttcsf{MethodSignatureTrace}: A method \ttcsf{method()} expecting a \ttcsf{String} and an \ttcsf{Integer} results in the \\ \ttctt{.method(Ljava/lang/String;I)} trace.
-\item \ttcsf{ClassListTrace}: A list of the \ttcsf{ChildClass1} and \ttcsf{ChildClass2} classes in the \ttcsf{example04} package results in the \ttctt{Lexample04/ChildClass1;\#Lexample04/ChildClass2;} trace.
+\item \ttcsf{MethodSignatureTrace}: Java methods are uniquely identifiable by their signature. In the Java Refactoring Case, the PG metamodel contains a \ttctt{TMethodSignature} class, which only identifies itself with the name of the method (with a relation to a \ttctt{TMethod} object identified by its name) and the list of its parameter types.
+
+To be able to find the \ttctt{TMethodSignature} objects with \eiq, we created a trace reference for each of them identified by the trimmed method signature. (\Eg a method \ttcsf{method()} expecting a \ttcsf{String} and an \ttcsf{Integer} will have the \ttctt{.method(Ljava/lang/String;I)} trace signature.)
+\item \ttcsf{ClassListTrace}: Expressions using universal quantifiers also need to be modified for \eiq. Since \eiq does not support collections as pattern parameters, a collection identifying trace object is required. 
+
+To express the collection of classes, a \ttctt{ClassListTrace} object will identify them with their signatures joined by the \ttctt{\#} character. (\Eg a list of the \ttcsf{ChildClass1} and \ttcsf{ChildClass2} classes in the \ttcsf{example04} package results in the \ttctt{Lexample04/ChildClass1;\#Lexample04/ChildClass2;} identifier.)
 \end{itemize}
 
-The trace model is generated with a \viatra transformation (\autoref{lst:TraceTransformation.xtend}) using \eiq patterns (\autoref{lst:TraceQueries.eiq}).
+After the PG is produced, it is extended with the trace model, generated with a \viatra transformation (\autoref{lst:TraceTransformation.xtend}) using \eiq patterns (\autoref{lst:TraceQueries.eiq}).
 
-\subsection{Refactoring}
+\subsection[Refactoring]{Refactoring\qquad\ttccircled{3}\ttccircled{4}}
 
 The refactoring operations are implemented as model transformations on the JDT ASG and the PG. Each model transformation is defined in \viatra: the LHS is defined with an \eiq pattern and the RHS is defined with an imperative Xtend code. As \viatra does not support bidirectional transformations, for each transformation on the PG, we also execute the appropriate actions on the ASG to keep the two graphs in sync.
 
@@ -132,7 +138,7 @@ The changes in the ASG are propagated to the source code~\ttccircled{5}. JDT is 
 
 The benchmarks were conducted on SHARE, running a 64-bit Arch Linux virtual machine. The machine utilized a single core of a 2.00~GHz Xeon E5-2650 CPU and 1~GB of RAM. We used OpenJDK~8 to run ARTE framework and the solution.
 
-\begin{table}
+\begin{table}[!htb]
 \centering
 \footnotesize
 \begin{tabular}{| l | r |}
