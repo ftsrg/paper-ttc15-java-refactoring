@@ -41,12 +41,7 @@ Refactoring operations are often used in software engineering to improve the rea
 \item Synchronising the source code and the program graph.
 \end{enumerate}
 
-The source code is defined in a restricted sub-language of Java 1.4. The EMF metamodel of the PG is provided in the case description. The case considers two basic refactoring operations:
-
-\begin{itemize}[noitemsep]
-\item \pum
-\item \cscz
-\end{itemize}
+The source code is defined in a restricted sub-language of Java 1.4. The EMF metamodel of the PG is provided in the case description. The case considers two basic refactoring operations: \pum and \cscz.
 
 The solution is tested in an automated test framework, ARTE (Automated Refactoring Test Environment). ARTE runs a set of test cases, each consisting of a source code projects and refactoring operations to check the correctness and the performance of the solution.
 
@@ -111,13 +106,13 @@ These maps provide trace information between the JDT model and the partially bui
 
 \ttcfig{trace-mm}{Metamodel of the trace model}{0.95}
 
-\noindent The main patterns for both refactoring operations contain a condition for checking ``every child'' (a collection of classes) of a certain class. Passing collections as pattern parameters is not supported by \eiq, \eg it is not possible to define a parameterized pattern which expects a list of classes. Also, the \iqpl does not support universal quantifiers. To overcome these limitations, we extended the program graph metamodel with a \emph{trace model} shown in~\autoref{fig:trace-mm}. The trace model defines traces for method signatures and class lists:
+\noindent The main patterns for both refactoring operations contain a condition that \eiq does not support out of the box, \eg checking ``every child'' (a collection of classes) of a certain class. Passing collections as pattern parameter is only possible with a workaround. Also, the \iqpl does not support universal quantifiers. To overcome these limitations, we extended the program graph metamodel with a \emph{trace model} shown in~\autoref{fig:trace-mm}. The trace model defines traces for method signatures and class lists:
 
 \begin{itemize}[noitemsep]
-\item \ttcsf{MethodSignatureTrace.} Java methods are uniquely identifiable by their signature. The basic PG metamodel contains a \ttcsf{TMethodSignature} class, which only identifies itself with the name of the method (with a relation to the \ttcsf{TMethod} object identified by its name) and the list of its parameter types.
+\item \ttcsf{MethodSignatureTrace.} Java methods are uniquely identifiable by their signature. The basic PG metamodel contains a \ttcsf{TMethodSignature} class, which only identifies itself with the name of the method (with a relation to the \ttcsf{TMethod} object) and the list of its parameter types.
 
-To support querying \ttcsf{TMethodSignature} objects with \eiq, we created a trace reference for each of them identified by the method signature. For example, a method \ttcsf{method()} expecting a \ttcsf{String} and an \ttcsf{Integer} will have the \ttctt{.method(Ljava/lang/String;I)} trace signature.
-\item \ttcsf{ClassListTrace.} To express the collection of classes, a \ttcsf{ClassListTrace} object will identify them with their signatures joined by the \ttctt{\#} character. For example, a list of the \ttcsf{ChildClass1} and \ttcsf{ChildClass2} classes in the \ttcsf{example04} package results in the \ttctt{Lexample04/ChildClass1;\#Lexample04/ChildClass2;} identifier.
+To support querying \ttcsf{TMethodSignature} objects with \eiq, we created a trace reference for each of them identified by their (partial\footnote{The complete signature would also contain the defining type (class or interface) signature and the return type signature.}) method signature. For example, a method \ttcsf{method()} expecting a \ttcsf{String} and an \ttcsf{Integer} will have the \ttctt{.method(Ljava/lang/String;I)} trace signature.
+\item \ttcsf{ClassListTrace.} To express the collection of classes, a \ttcsf{ClassListTrace} object will identify them with their signatures joined by the \ttctt{\#} character. For example, a list of the \ttcsf{ChildClass1} and \ttcsf{ChildClass2} classes in the \ttcsf{example04} package have the \ttctt{Lexample04/ChildClass1;\#Lexample04/ChildClass2;} list identifier.
 \end{itemize}
 
 After the PG is produced, it is extended with the trace model. The traces are based on \eiq patterns (\autoref{lst:TraceQueries.eiq}) and generated with a \viatra transformation (\autoref{lst:TraceTransformation.xtend}).
@@ -127,22 +122,31 @@ After the PG is produced, it is extended with the trace model. The traces are ba
 The refactoring operations are implemented as model transformations on the JDT ASG and the PG. Each model transformation is defined in \viatra: the LHS is defined with an \eiq pattern and the RHS is defined with an imperative Xtend code. As \viatra does not support bidirectional transformations, for each transformation on the PG, we also execute the appropriate actions on the ASG to keep the two graphs in sync.
 
 \subsubsection{Pull Up Method}
+After creating the method signature traces, the following preconditions have to be met before pulling up a method:
 
-\autoref{lst:PUMQueries.eiq}
+\begin{itemize}[noitemsep]
+	 \item every child class has a method with the given signature,
+	 \item the parent class does not have it already,
+	 \item and the transformation will not create unavailable method or field access.
+\end{itemize}
 
-\autoref{lst:PUMTransformation.xtend}
+%\noindent\ttctt{pattern possiblePUM(parentClass : TClass, methodSignatureTrace : MethodSignatureTrace)}
+
+The main pattern, deciding, whether the \pum can be executed collects every parent class -- method signature pair, that satisfies the preconditions. The LHS is defined with one pattern, supported by 5 other. The execution is controlled by parameterising the main pattern using another two. (See \autoref{lst:PUMQueries.eiq}.) The RHS is defined in \autoref{lst:PUMTransformation.xtend}, where one utility pattern is also used.
 
 \subsubsection{Create Superclass}
+To create a new superclass, the list of the targeted classes have to be connected with a class list trace, virtually selecting them for the pattern. The transformation can be executed, if the preconditions are statisfied:
 
-\autoref{lst:CSCQueries.eiq}
+\begin{itemize}[noitemsep]
+	\item the target parent class does not exist
+	\item and every targeted child class has the same parent.
+\end{itemize}
 
-\autoref{lst:CSCTransformation.xtend}
+The LHS is defined in \autoref{lst:CSCQueries.eiq} with 1 main and 5 support patterns. The RHS is defined in \autoref{lst:CSCTransformation.xtend}, also using one utility pattern.
 
-\subsection{Transforming the ASG to Source Code}
+\subsection[Transforming the ASG to Source Code]{Transforming the ASG to Source Code\qquad\ttccircled{5}}
 
-%kell ez ilyen részletesen? Amúgy ide lehet írni, hog y azért jó a JDT, mert formázást lehetőleg tartva, inkrementálisan (?) frissíti a tartalmat. Mivel nem Eclipse környezetben vagyunk, ezért a fájl mentése során nem inkrementális a fájl módosítása. 
-
-The changes in the ASG are propagated to the source code~\ttccircled{5}. JDT is capable of incrementally maintaining each source code file based on the changes in its AST.\footnote{The \textsf{CompilationUnit.rewrite()} method returns a set of text manipulation operations in the form of a \textsf{TextEdit} class.}
+The changes in the ASG made by the transformations are propagated to the source code. JDT is capable of incrementally maintaining each source code file (compilation unit) based on the changes in its AST.\footnote{The \textsf{CompilationUnit.rewrite()} method returns a set of text manipulation operations in the form of a \textsf{TextEdit} object.}
 
 \section{Evaluation}
 
