@@ -92,14 +92,14 @@ The code is written in Java~8 and Xtend~\cite{Xtend}. The queries and transforma
 The framework receives the path to the directory containing the source files. JDT parses these files and returns each file parsed as an AST. These ASTs are interconnected, which means that using JDT's binding resolution mechanism, the developer can navigate from one AST to another one.
 
 \subsection[Producing the Program Graph]{Producing the Program Graph\qquad\ttccircled{2}}
-Since JDT does not produce EMF models, the generated ASTs do not support complex queries and traversal operations as the ones provided by EMF and EMF-based query languages (e.g. Eclipse OCL or \eiq). To extract information and build the PG, our solution applies a visitor resulting a two-pass traversal on the ASG.
+Since JDT does not produce EMF models, the generated ASTs do not support complex queries and traversal operations as the ones provided by EMF and EMF-based query languages (e.g. Eclipse OCL or \eiq). To extract information and to build the PG, our solution applies a visitor resulting a two-pass traversal on the ASG.
 
 \begin{enumerate}[noitemsep]
 \item For each object, the visitor method creates the corresponding object(s) in the PG. Since the order of these visits is non-deterministic, the framework uses maps to store the mapping from the objects in the ASG to the objects in the PG.
 
 These maps provide trace information between the JDT model and the partially built PG. The visitor also collects the relations between JDT nodes and caches the unique identifiers of each connected node for every relation type. 
 
-\item After every compilation unit was parsed, the previously populated caches are used to create the cross-references between the objects in the PG (\eg \ttctt{TMember.access}).
+\item After every compilation unit was parsed, the previously populated caches are used to create the cross-references between the objects in the PG (\eg \ttcsf{TMember.access}).
 \end{enumerate}
 
 \subsection[Extending the PG with the Trace Model]{Extending the PG with the Trace Model\qquad\ttccircled{2}\ttccircled{3}\ttccircled{4}}
