@@ -111,7 +111,7 @@ These maps provide trace information between the JDT model and the partially bui
 \begin{itemize}[noitemsep]
 \item \ttcsf{MethodSignatureTrace.} Java methods are uniquely identifiable by their signature. The basic PG metamodel contains a \ttcsf{TMethodSignature} class, which only identifies itself with the name of the method (with a relation to the \ttcsf{TMethod} object) and the list of its parameter types.
 
-To support querying \ttcsf{TMethodSignature} objects with \eiq, we created a trace reference for each of them identified by their (partial\footnote{The complete signature would also contain the defining type (class or interface) signature and the return type signature.}) method signature. For example, a method \ttcsf{method()} expecting a \ttcsf{String} and an \ttcsf{Integer} will have the \ttctt{.method(Ljava/lang/String;I)} trace signature.
+To support querying \ttcsf{TMethodSignature} objects with \eiq, we created a trace reference for each of them identified by their partial\footnote{The complete signature would also contain the defining type (class or interface) signature and the return type signature.} method signature. For example, a method \ttcsf{method()} expecting a \ttcsf{String} and an \ttcsf{Integer} will have the \ttctt{.method(Ljava/lang/String;I)} trace signature.
 \item \ttcsf{ClassListTrace.} To express the collection of classes, a \ttcsf{ClassListTrace} object will identify them with their signatures joined by the \ttctt{\#} character. For example, a list of the \ttcsf{ChildClass1} and \ttcsf{ChildClass2} classes in the \ttcsf{example04} package have the \ttctt{Lexample04/ChildClass1;\#Lexample04/ChildClass2;} list identifier.
 \end{itemize}
 
