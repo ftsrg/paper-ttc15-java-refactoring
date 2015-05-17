@@ -56,7 +56,7 @@ Solving the case requires the integration of a model transformation tool and a J
 
 \subsection{\eiq}
 
-The objective of the \eiq~\cite{models2010, eiq-homepage} framework is to provide a declarative way to define queries over EMF models. \eiq extended the pattern language of \viatratwo with new features (including transitive closure, role navigation, match count) and tailored it to EMF models~\cite{iqpl}. While \eiq is developed with a focus on \emph{incremental query evaluation}, the latest version also provides a \emph{local search-based query evaluation} algorithm.
+The objective of the \eiq~\cite{models2010, eiq-homepage} framework is to provide a declarative way to define queries over EMF models. \eiq extended the pattern language of \viatratwo with new features (including transitive closure, role navigation, match count) and tailored it to EMF models, resulting in \iqpl~\cite{iqpl}. While \eiq is developed with a focus on \emph{incremental query evaluation}, the latest version also provides a \emph{local search-based query evaluation} algorithm.
 
 \subsection{\viatra}
 
@@ -97,12 +97,12 @@ The code is written in Java~8 and Xtend~\cite{Xtend}. The queries and transforma
 The framework receives the path to the directory containing the source files. JDT parses these files and returns each file, each compilation unit parsed as an AST. These ASTs are interconnected, and using JDT's binding resolution mechanism, one can navigate from one AST to another AST.
 
 \subsection[Producing the Program Graph]{Producing the Program Graph\qquad\ttccircled{2}}
-Since JDT does not produce EMF models, it does not support such complex queries and traversal operations as the ones used on EMF models. To extract information and build the PG, our solution applies a visitor pattern resulting a two-pass traversal on the ASG.
+Since JDT does not produce EMF models, it does not support complex queries and traversal operations as the ones provided by EMF and EMF-based query languages (e.g. Eclipse OCL or \eiq). To extract information and build the PG, our solution applies a visitor resulting a two-pass traversal on the ASG.
 
 \begin{enumerate}[noitemsep]
-\item For each object, the visitor method creates the corresponding object(s) in the PG. Since the order of these visits is non-deterministic, the framework maintains maps to store the mapping from the objects in the ASG to the objects in the PG.
+\item For each object, the visitor method creates the corresponding object(s) in the PG. Since the order of these visits is non-deterministic, the framework uses maps to store the mapping from the objects in the ASG to the objects in the PG.
 
-These maps provide trace information between the JDT model and the partially build PG. The visitor also collects the relations between JDT nodes and caches the unique identifiers of each connected node for every relation type. 
+These maps provide trace information between the JDT model and the partially built PG. The visitor also collects the relations between JDT nodes and caches the unique identifiers of each connected node for every relation type. 
 
 \item After every compilation unit was parsed, the previously populated caches are used to create the cross-references between the objects in the PG (\eg \ttctt{TMember.access}).
 \end{enumerate}
@@ -111,28 +111,38 @@ These maps provide trace information between the JDT model and the partially bui
 
 \ttcfig{trace-mm}{Metamodel of the trace model}{0.95}
 
-\noindent\eiq does not support collections as pattern parameters, \eg it is not possible to define a parameterized pattern which expects a list of classes as a parameter. To overcome this limitation, we extended the program graph metamodel with a \emph{trace model} shown in~\autoref{fig:trace-mm}. The trace model defines traces for method signatures and class lists:
+\noindent The main patterns for both refactoring operations contain a condition for checking ``every child'' (a collection of classes) of a certain class. Passing collections as pattern parameters is not supported by \eiq, \eg it is not possible to define a parameterized pattern which expects a list of classes. Also, the \iqpl does not support universal quantifiers. To overcome these limitations, we extended the program graph metamodel with a \emph{trace model} shown in~\autoref{fig:trace-mm}. The trace model defines traces for method signatures and class lists:
 
 \begin{itemize}[noitemsep]
-\item \ttcsf{MethodSignatureTrace}: Java methods are uniquely identifiable by their signature. In the Java Refactoring Case, the PG metamodel contains a \ttctt{TMethodSignature} class, which only identifies itself with the name of the method (with a relation to a \ttctt{TMethod} object identified by its name) and the list of its parameter types.
+\item \ttcsf{MethodSignatureTrace.} Java methods are uniquely identifiable by their signature. The basic PG metamodel contains a \ttcsf{TMethodSignature} class, which only identifies itself with the name of the method (with a relation to the \ttcsf{TMethod} object identified by its name) and the list of its parameter types.
 
-To be able to find the \ttctt{TMethodSignature} objects with \eiq, we created a trace reference for each of them identified by the trimmed method signature. (\Eg a method \ttcsf{method()} expecting a \ttcsf{String} and an \ttcsf{Integer} will have the \ttctt{.method(Ljava/lang/String;I)} trace signature.)
-\item \ttcsf{ClassListTrace}: Expressions using universal quantifiers also need to be modified for \eiq. Since \eiq does not support collections as pattern parameters, a collection identifying trace object is required. 
-
-To express the collection of classes, a \ttctt{ClassListTrace} object will identify them with their signatures joined by the \ttctt{\#} character. (\Eg a list of the \ttcsf{ChildClass1} and \ttcsf{ChildClass2} classes in the \ttcsf{example04} package results in the \ttctt{Lexample04/ChildClass1;\#Lexample04/ChildClass2;} identifier.)
+To support querying \ttcsf{TMethodSignature} objects with \eiq, we created a trace reference for each of them identified by the method signature. For example, a method \ttcsf{method()} expecting a \ttcsf{String} and an \ttcsf{Integer} will have the \ttctt{.method(Ljava/lang/String;I)} trace signature.
+\item \ttcsf{ClassListTrace.} To express the collection of classes, a \ttcsf{ClassListTrace} object will identify them with their signatures joined by the \ttctt{\#} character. For example, a list of the \ttcsf{ChildClass1} and \ttcsf{ChildClass2} classes in the \ttcsf{example04} package results in the \ttctt{Lexample04/ChildClass1;\#Lexample04/ChildClass2;} identifier.
 \end{itemize}
 
-After the PG is produced, it is extended with the trace model, generated with a \viatra transformation (\autoref{lst:TraceTransformation.xtend}) using \eiq patterns (\autoref{lst:TraceQueries.eiq}).
+After the PG is produced, it is extended with the trace model. The traces are based on \eiq patterns (\autoref{lst:TraceQueries.eiq}) and generated with a \viatra transformation (\autoref{lst:TraceTransformation.xtend}).
 
 \subsection[Refactoring]{Refactoring\qquad\ttccircled{3}\ttccircled{4}}
 
 The refactoring operations are implemented as model transformations on the JDT ASG and the PG. Each model transformation is defined in \viatra: the LHS is defined with an \eiq pattern and the RHS is defined with an imperative Xtend code. As \viatra does not support bidirectional transformations, for each transformation on the PG, we also execute the appropriate actions on the ASG to keep the two graphs in sync.
 
+\subsubsection{Pull Up Method}
+
+\autoref{lst:PUMQueries.eiq}
+
+\autoref{lst:PUMTransformation.xtend}
+
+\subsubsection{Create Superclass}
+
+\autoref{lst:CSCQueries.eiq}
+
+\autoref{lst:CSCTransformation.xtend}
+
 \subsection{Transforming the ASG to Source Code}
 
 %kell ez ilyen részletesen? Amúgy ide lehet írni, hog y azért jó a JDT, mert formázást lehetőleg tartva, inkrementálisan (?) frissíti a tartalmat. Mivel nem Eclipse környezetben vagyunk, ezért a fájl mentése során nem inkrementális a fájl módosítása. 
 
-The changes in the ASG are propagated to the source code~\ttccircled{5}. JDT is capable of incrementally maintaining each source code file on the changes in its AST.\footnote{The \textsf{CompilationUnit.rewrite()} method returns a set of text manipulation operations in the form of a \textsf{TextEdit} class.}
+The changes in the ASG are propagated to the source code~\ttccircled{5}. JDT is capable of incrementally maintaining each source code file based on the changes in its AST.\footnote{The \textsf{CompilationUnit.rewrite()} method returns a set of text manipulation operations in the form of a \textsf{TextEdit} class.}
 
 \section{Evaluation}
 
