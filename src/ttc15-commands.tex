@@ -1,0 +1,154 @@
+% TTC additions
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{xspace}
+\usepackage{rotating,amsmath,amsfonts,amssymb}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{todonotes}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{framed}
+
+% custom commands
+\definecolor{negcolor}{RGB}{223,49,35}
+\definecolor{newcolor}{RGB}{43,183,47}
+\definecolor{delcolor}{RGB}{59,66,161}
+
+\newcommand*\ttccircled[1]{\raisebox{.5pt}{\textcircled{\raisebox{-.9pt} {\textsf{\footnotesize#1}}}}}
+\newcommand{\union}{\cup}
+\newcommand{\intersection}{\cap}
+\newcommand{\parentheses}[1]{\left(#1\right)}
+\newcommand{\op}[2]{\mathrm{#1}\parentheses{#2}}
+\newcommand{\figref}[1]{\autoref{fig:#1}}
+\newcommand{\lstref}[1]{\autoref{lst:#1}}
+\newcommand{\naturaljoin}{\bowtie}
+\newcommand{\antijoin}{\, \triangleright \,}
+\newcommand{\eiq}{\mbox{\textsc{EMF-IncQuery}}\@\xspace}
+\newcommand{\viatra}{\mbox{\textsc{Viatra}}\@\xspace}
+\newcommand{\viatratwo}{\mbox{\textsc{Viatra2}}\@\xspace}
+\newcommand{\evm}{\mbox{\textsc{Viatra-EVM}}\@\xspace}
+\newcommand{\jdt}{\mbox{Eclipse JDT}\@\xspace}
+\newcommand{\xtend}{\mbox{Xtend}\@\xspace}
+\newcommand{\iqpl}{\mbox{\textsc{IncQuery}} Pattern Language\@\xspace}
+\newcommand{\tb}{Train Benchmark\@\xspace}
+
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+
+\newcommand{\ie}{i.e.\@\xspace}
+\newcommand{\Ie}{I.e.\@\xspace}
+\newcommand{\eg}{e.g.\@\xspace}
+\newcommand{\Eg}{E.g.\@\xspace}
+\newcommand{\etal}{et al.\@\xspace}
+\newcommand{\etc}{etc.\@\xspace}
+
+\newcommand{\ttcsf}[1]{\textsf{\small #1}}
+\newcommand{\ttctt}[1]{\texttt{\small #1}}
+\newcommand{\ttcfig}[3]{
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=#3\textwidth]{figures/#1}
+	\caption{#2.}
+	\label{fig:#1}
+\end{figure}}
+
+\newcommand{\ttcpattern}[2]{
+\begin{figure}[H] 
+	\centering
+	\includegraphics[scale=0.3]{figures/#1}
+	\caption{#2.}
+	\label{fig:#1}
+\end{figure}}
+
+\newcommand{\ttcfigscale}[3]{
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=#3]{figures/#1}
+	\caption{#2.}
+	\label{fig:#1}
+\end{figure}}
+
+\newcommand{\ttcsubfig}[2]{
+	\begin{subfigure}[b]{0.49\textwidth}
+		\centering
+		\includegraphics[scale=0.21]{figures/#1}
+		\caption{#2}
+		\label{fig:#1}
+	\end{subfigure}
+}
+
+\definecolor{lightgray}{RGB}{242,242,242}
+\definecolor{keywordcolor}{RGB}{0,0,160}
+\definecolor{commentcolor}{RGB}{0,128,64}
+\lstset{
+	numbers=left,
+	numberstyle=\scriptsize\ttfamily,
+	stepnumber=1,
+	numbersep=5pt,
+	%
+	backgroundcolor=\color{lightgray},
+	basicstyle=\scriptsize\ttfamily, % print whole listing small
+	keywordstyle=\color{keywordcolor}\bfseries\ttfamily,
+	commentstyle=\color{commentcolor}\ttfamily,
+	stringstyle=\color{stringcolor}\ttfamily,
+	identifierstyle=, % nothing happens
+	stringstyle=\scriptsize,
+	%
+	showstringspaces=false, % no special string spaces
+	aboveskip=3pt,
+	belowskip=3pt,
+	columns=flexible,
+	keepspaces=true,
+	breaklines=true,	
+	frameround=tttt,
+	captionpos=b,
+	tabsize=2,
+	frame=tb,
+	framerule=0pt,
+	framexleftmargin=0.25em,
+}
+
+\lstdefinelanguage{iqpl}
+{
+	morekeywords={@QueryBasedFeature,@Constraint,count,pattern,package,neg,find,import,true,false,or,check,job,action,state,severity,location,message,oclIsKindOf,self,exists,includes,invariant,class},
+	sensitive=true,
+	morecomment=[l]{//},
+	morecomment=[s]{/*}{*/},
+	morestring=[b]{"},
+}
+
+\lstdefinelanguage{xtend}{
+	morekeywords={class,for,def,val,var,cached,case,default,extension,false,import,JAVA,WORKFLOWSLOT,let,new,null,public,protected,private,create,switch,this,true,reexport,around,if,then,else,context,DEFAULT_NO_UPDATE_AND_DISAPPEAR,DEFAULT,APPEARED,DISAPPEARED,UPDATED,processor},
+	keywordstyle=[2]{\textbf},
+	morecomment=[l]{//},
+	morecomment=[s]{/*}{*/},
+	morestring=[b]",
+	mathescape=true,
+}
+
+\newcommand{\listingiqpl}[2]
+{
+	\lstset{
+		language=iqpl
+	}
+	\lstinputlisting[label=lst:#1, caption=#2.]{code/#1}
+}
+
+\newcommand{\listingxtend}[2]{
+	\lstset{
+		language=xtend,
+		escapeinside={(*@}{@*)},
+		literate=*{[guilleft]}{\guillemotleft{}}{1}{[guilright]}{\guillemotright{}}{1}
+	}
+	\lstinputlisting[label=lst:#1, caption=#2.]{code/#1}
+}
+
+\newcommand{\listingjava}[2]{
+	\lstset{
+		language=Java
+	}
+	\lstinputlisting[label=lst:#1, caption=#2.]{code/#1}
+}

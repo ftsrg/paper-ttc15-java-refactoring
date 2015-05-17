@@ -1,0 +1,64 @@
+package hu.bme.mit.ttc.refactoring.patterns
+
+import "platform:/plugin/TypeGraphBasic/model/TypeGraphBasic.ecore"
+import "platform:/plugin/TypeGraphBasic/model/TypeGraphTrace.ecore"
+
+/*
+ * Main decision pattern. If the preconditions are statisfied (the
+ * targetClass should not exist), the pattern returns its parameters, if:
+ *  - every child class has the same parent
+ */
+pattern possibleCSC(concatSignature, methodSignature : TMethodSignature) {
+	ClassListTrace.concatSignature(classListTrace, concatSignature);
+	ClassListTrace.tClasses.signature(classListTrace, methodSignature);
+	
+	neg find childClassesWithDifferentParents(classListTrace, _, _);
+}
+
+pattern childClassesWithDifferentParents(classListTrace : ClassListTrace, classOne : TClass, classTwo : TClass) {
+	ClassListTrace.tClasses(classListTrace, classOne);
+	ClassListTrace.tClasses(classListTrace, classTwo);
+	find differentParents(classOne, classTwo);
+}
+
+pattern differentParents(classOne : TClass, classTwo : TClass) {
+	TClass.parentClass(classOne, parentClassOne);
+	TClass.parentClass(classTwo, parentClassTwo);
+	parentClassOne != parentClassTwo;
+} or {
+	TClass(classTwo);
+	find hasParent(classOne);
+	neg find hasParent(classTwo);
+} or {
+	TClass(classOne);
+	find hasParent(classTwo);
+	neg find hasParent(classOne);
+}
+
+pattern hasParent(tClass : TClass) {
+	TClass.parentClass(tClass, _);
+}
+
+pattern classesOfClassListTrace(concatSignature, tClass : TClass) {
+	ClassListTrace.concatSignature(classListTrace, concatSignature);
+	ClassListTrace.tClasses(classListTrace, tClass);
+}
+
+pattern methodSignatureAndTrace(trace : MethodSignatureTrace, methodSignature : TMethodSignature) {
+	MethodSignatureTrace.tMethodSignature(trace, methodSignature);
+}
+
+// pattern for PG refactor
+pattern packageWithName(tPackage : TPackage, packageName) {
+	TPackage.tName(tPackage, packageName);
+}
+
+// pattern for PG refactor
+pattern typeGraphs(typeGraph : TypeGraph) {
+	TypeGraph(typeGraph);
+}
+
+// fire precondition pattern
+pattern classWithName(tClass : TClass, className) {
+	TClass.tName(tClass, className);
+}
