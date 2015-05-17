@@ -86,20 +86,20 @@ The code is written in Java~8 and Xtend~\cite{Xtend}. The queries and transforma
 
 \ttcfig{pg}{Workflow of the transformation}{0.8}
 
-\noindent\autoref{fig:pg} shows the workflow of the transformation. The workflow consists of five steps: the source code is parsed into an ASG~\ttccircled{1}; a PG is produced~\ttccircled{2}; based on the PG, the possible transformations are calculated~\ttccircled{3}; if possible, these transformations are executed~\ttccircled{4}; finally, the results of the transformations are serialized~\ttccircled{5}. In the following, we discuss these steps in detail.
+\noindent\autoref{fig:pg} shows the high-level workflow of the transformation. This consists of five steps: the source code is parsed into an ASG~\ttccircled{1}; a PG is produced~\ttccircled{2}; based on the PG, the possible transformations are calculated~\ttccircled{3}; if possible, these transformations are executed~\ttccircled{4}; finally, the results of the transformations are serialized~\ttccircled{5}. In the following, we discuss these steps in detail.
 
 \subsection[Parsing the Source Code]{Parsing the Source Code\qquad\ttccircled{1}}
-The framework receives the path to the directory containing the source files. JDT parses these files and returns each file parsed as an AST. These ASTs are interconnected, which means that using JDT's binding resolution mechanism, the developer can navigate from one AST to another one.
+The solution receives the path to the directory containing the source files. JDT parses these files and returns each file parsed as an AST. These ASTs are interconnected, which means that using JDT's binding resolution mechanism, the developer can navigate from one AST to another one.
 
 \subsection[Producing the Program Graph]{Producing the Program Graph\qquad\ttccircled{2}}
 Since JDT does not produce EMF models, the generated ASTs do not support complex queries and traversal operations as the ones provided by EMF and EMF-based query languages (e.g. Eclipse OCL or \eiq). To extract information and to build the PG, our solution applies a visitor resulting a two-pass traversal on the ASG.
 
 \begin{enumerate}[noitemsep]
-\item For each object, the visitor method creates the corresponding object(s) in the PG. Since the order of these visits is non-deterministic, the framework uses maps to store the mapping from the objects in the ASG to the objects in the PG.
+\item For each object, the visitor method creates the corresponding object(s) in the PG. Since the order of these visits is non-deterministic, the visitor maintains maps to store the mapping from the objects in the ASG to the objects in the PG.
 
 These maps provide trace information between the JDT model and the partially built PG. The visitor also collects the relations between JDT nodes and caches the unique identifiers of each connected node for every relation type. 
 
-\item After every compilation unit was parsed, the previously populated caches are used to create the cross-references between the objects in the PG (\eg \ttcsf{TMember.access}).
+\item After every compilation unit has been parsed, the previously populated caches are used to create the cross-references between the objects in the PG (\eg \ttcsf{TMember.access}).
 \end{enumerate}
 
 \subsection[Extending the PG with the Trace Model]{Extending the PG with the Trace Model\qquad\ttccircled{2}\ttccircled{3}\ttccircled{4}}
@@ -109,10 +109,10 @@ These maps provide trace information between the JDT model and the partially bui
 \noindent The main patterns for both refactoring operations contain a condition that \eiq does not support out of the box, \eg checking ``every child'' (a collection of classes) of a certain class. Passing collections as pattern parameter is only possible with a workaround. Also, the \iqpl does not support universal quantifiers. To overcome these limitations, we extended the program graph metamodel with a \emph{trace model} shown in~\autoref{fig:trace-mm}. The trace model defines traces for method signatures and class lists:
 
 \begin{itemize}[noitemsep]
-\item \ttcsf{MethodSignatureTrace.} Java methods are uniquely identifiable by their signature. The basic PG metamodel contains a \ttcsf{TMethodSignature} class, which only identifies itself with the name of the method (with a relation to the \ttcsf{TMethod} object) and the list of its parameter types.
+\item \ttcsf{MethodSignatureTrace.} Java methods are uniquely identifiable by their signature. The basic PG metamodel contains a \ttcsf{TMethodSignature} class, which only identifies itself with the name of the method (using a relation to the \ttcsf{TMethod} object) and the list of its parameter types.
 
 To support querying \ttcsf{TMethodSignature} objects with \eiq, we created a trace reference for each of them identified by their partial\footnote{The complete signature would also contain the defining type (class or interface) signature and the return type signature.} method signature. For example, a method \ttcsf{method()} expecting a \ttcsf{String} and an \ttcsf{Integer} will have the \ttctt{.method(Ljava/lang/String;I)} trace signature.
-\item \ttcsf{ClassListTrace.} To express the collection of classes, a \ttcsf{ClassListTrace} object will identify them with their signatures joined by the \ttctt{\#} character. For example, a list of the \ttcsf{ChildClass1} and \ttcsf{ChildClass2} classes in the \ttcsf{example04} package have the \ttctt{Lexample04/ChildClass1;\#Lexample04/ChildClass2;} list identifier.
+\item \ttcsf{ClassListTrace.} To express the collection of classes, a \ttcsf{ClassListTrace} object will identify them with their signatures joined by the \ttctt{\#} character. For example, a list of the \ttcsf{ChildClass1} and \ttcsf{ChildClass2} classes in the \ttcsf{example04} package have the \ttctt{Lexample04/ChildClass1;\#Lexample04/ChildClass2;} trace signature.
 \end{itemize}
 
 After the PG is produced, it is extended with the trace model. The traces are based on \eiq patterns (\autoref{lst:TraceQueries.eiq}) and generated with a \viatra transformation (\autoref{lst:TraceTransformation.xtend}).
@@ -121,10 +121,10 @@ The \emph{universal quantifier} is implemented as a double negation of the exist
 
 \subsection[Refactoring]{Refactoring\qquad\ttccircled{3}\ttccircled{4}}
 
-The refactoring operations are implemented as model transformations on the JDT ASG and the PG. Each model transformation is defined in \viatra: the LHS is defined with an \eiq pattern and the RHS is defined with an imperative Xtend code. As \viatra does not support bidirectional transformations, for each transformation on the PG, we also execute the appropriate actions on the ASG to keep the two graphs in sync.
+The refactoring operations are implemented as model transformations on the JDT ASG and the PG. Each model transformation is defined in \viatra: the LHS is defined with an \eiq pattern and the RHS is defined with imperative Xtend code. As \viatra does not support bidirectional transformations, for each transformation on the PG, we also execute the appropriate actions on the ASG to keep the two graphs in sync.
 
 \subsubsection{Pull Up Method}
-After creating the method signature traces, the following preconditions must be met before pulling up a method:
+After creating the method signature traces, the following preconditions must be satisfied before pulling up a method:
 
 \begin{itemize}[noitemsep]
 	 \item every child class has a method with the given signature,
@@ -132,7 +132,7 @@ After creating the method signature traces, the following preconditions must be 
 	 \item the transformation will not create an unsatisfiable method or field access.
 \end{itemize}
 
-The main pattern---deciding whether the \pum can be executed---collects every parent class--method signature pair satisfying the preconditions. The LHS is defined with six patterns in total. The execution is controlled by parameterising the main pattern (\ttcsf{possiblePUM}) listed in \autoref{lst:PUMQueries.eiq}. The RHS is defined in \autoref{lst:PUMTransformation.xtend}, using one utility pattern.
+To decide whether the refactoring can be executed, every $\langle \text{parent class}, \text{method signature} \rangle$ pair satisfying the preconditions is collected by the main pattern (\ttcsf{possiblePUM}). The LHS is defined with six patterns in total. The execution is controlled by parameterising the main pattern listed in \autoref{lst:PUMQueries.eiq}. The RHS is defined in \autoref{lst:PUMTransformation.xtend}, using one utility pattern.
 
 \subsubsection{Create Superclass}
 To create a new superclass, the parent class and the list of selected classes (connected to a class list trace) have to be passed to the pattern. The transformation can be executed if the following preconditions are satisfied:
@@ -150,7 +150,7 @@ The changes in the ASG made by the transformations are propagated to the source 
 
 \section{Evaluation}
 
-The benchmarks were conducted on SHARE, running a 64-bit Arch Linux virtual machine. The machine utilized a single core of a 2.00~GHz Xeon E5-2650 CPU and 1~GB of RAM. We used OpenJDK~8 to run ARTE framework and the solution.
+The benchmarks were conducted on a 64-bit Arch Linux virtual machine running in SHARE. The machine utilized a single core of a 2.00~GHz Xeon E5-2650 CPU and 1~GB of RAM. We used OpenJDK~8 to run ARTE framework and the solution.
 
 \subsection{Benchmark Results}
 
@@ -184,13 +184,13 @@ We executed the tests and used the log files to determine the execution times. T
 
 \subsection{Analysis of the Solution}
 
-The results show that all public and hidden test cases have been executed successfully. Hence, we consider the solution as \emph{complete} and \emph{correct}. As the test cases only contained small examples, we cannot draw conclusions on the performance of the solution. However, it is worth noting that all test cases executed in less than half a second.
+The results show that all public and hidden test cases have been executed successfully. Hence, we consider the solution \emph{complete} and \emph{correct}. As the test cases only contained small examples, we cannot draw conclusions on the performance of the solution. Still, it is worth noting that all test cases executed in less than half a second.
 
-The implementation of the solution required quite a lot of code. The patterns were formulated in about 150 lines of \iqpl code. The transformations required 400 lines of Xtend code, while implementing the interface required by ARTE and the visitor for the transformation required more than 800 lines of Java code.
+The implementation of the solution required quite a lot of code. The patterns were formulated in about 150 lines of \iqpl code. The transformations required 400 lines of Xtend code, while implementing the interface required by ARTE and the visitor for the transformation required more than 800 lines of Java code. However, the source code is well-structured and is easy to comprehend.
 
 \section{Summary}
 
-This paper presented a solution for the Java Refactoring case of the 2015 Transformation Tool Contest. The solution addresses both challenges (bidirectional synchronisation and program transformation) and both refactoring operations (pull up method, create superclass) defined in the case. The framework is flexible enough to allow the user to define new refactoring operations, \eg \ttcsf{Extract Class} or \ttcsf{Pull Up Field}.
+This paper presented a solution for the Java Refactoring case of the 2015 Transformation Tool Contest. The solution addresses both challenges (bidirectional synchronisation and program transformation) and both refactoring operations (\pum, \cscz) defined in the case. The framework is flexible enough to allow the user to define new refactoring operations, \eg \ttcsf{Extract Class} or \ttcsf{Pull Up Field}.
 
 \paragraph{Acknowledgements.} The authors would like to thank Ábel Hegedüs, Oszkár Semeráth and Zoltán Ujhelyi for providing valuable insights into \eiq and \viatra.
 
