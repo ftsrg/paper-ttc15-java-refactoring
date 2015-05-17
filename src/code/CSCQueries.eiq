@@ -15,7 +15,7 @@ pattern possibleCSC(concatSignature, methodSignature : TMethodSignature) {
 	neg find childClassesWithDifferentParents(classListTrace, _, _);
 }
 
-pattern childClassesWithDifferentParents(classListTrace : ClassListTrace, classOne : TClass, classTwo : TClass){//, parentClassOne : TClass, parentClassTwo : TClass) {
+pattern childClassesWithDifferentParents(classListTrace : ClassListTrace, classOne : TClass, classTwo : TClass) {
 	ClassListTrace.tClasses(classListTrace, classOne);
 	ClassListTrace.tClasses(classListTrace, classTwo);
 	find differentParents(classOne, classTwo);
