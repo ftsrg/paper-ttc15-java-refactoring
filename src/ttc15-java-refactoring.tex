@@ -51,11 +51,11 @@ Solving the case requires the integration of a model transformation tool and a J
 
 \subsection{\eiq}
 
-The objective of the \eiq~\cite{models2010, eiq-homepage} framework is to provide a declarative way to define queries over EMF models. \eiq extended the pattern language of \viatratwo with new features (including transitive closure, role navigation, match count) and tailored it to EMF models, resulting in \iqpl~\cite{iqpl}. While \eiq is developed with a focus on \emph{incremental query evaluation}, the latest version also provides a \emph{local search-based query evaluation} algorithm.
+The objective of the \eiq~\cite{models2010, eiq-homepage} framework is to provide a declarative way to define queries over EMF models. \eiq extended the pattern language of \viatratwo with new features (including transitive closure, role navigation, match count) and tailored it to EMF models, resulting in the \iqpl~\cite{iqpl}. While \eiq is developed with a focus on \emph{incremental query evaluation}, the latest version also provides a \emph{local search-based query evaluation} algorithm.
 
 \subsection{\viatra}
 
-The \viatra framework supports the development of model transformations with specific focus on event-driven, reactive transformations~\cite{viatra}. Building upon the incremental query support of \eiq, \viatra offers a language to define transformations and a reactive transformation engine to execute certain transformations upon changes in the underlying model. The \viatra project provides:
+The \viatra framework supports the development of model transformations with a particular emphasis on event-driven, reactive transformations~\cite{viatra}. Building upon the incremental query support provided by \eiq, \viatra offers a language to define transformations and a reactive transformation engine to execute certain transformations upon changes in the underlying model. The \viatra project provides:
 
 \begin{itemize}[noitemsep]
 	\item An internal DSL over the \xtend~\cite{Xtend} language to specify both batch and event-driven, reactive transformations.
