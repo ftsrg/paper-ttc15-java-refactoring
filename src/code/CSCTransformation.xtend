@@ -71,7 +71,6 @@ class CSCTransformation {
 		val tClasses = engine.getMatcher(classesOfClassListTrace).getAllValuesOftClass(concatSignature)
 		
 		val List<TypeDeclaration> astChildClasses = findCompilationUnits(tClasses)
-//		val methodDeclarations = findMethodDeclarations(astChildClasses, methodSignature)
 		
 		val firstChild = astChildClasses.get(0)
 		
@@ -79,11 +78,8 @@ class CSCTransformation {
 			targetCU = createTargetClass(firstChild, firstChild.superclassType)
 		}
 		
-//		insertMethodDeclaration(methodDeclarations.get(0))
-//		removeChildMethodDeclarations(methodDeclarations)
 		setParentClass(astChildClasses)
-		/// TODO should we add explicit dependency? (child classes import their new parent)
-		
+
 		serializeCUs
 		
 		

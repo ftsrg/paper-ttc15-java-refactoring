@@ -25,7 +25,6 @@ class TraceTransformation {
 	extension BatchTransformationStatements statements
 	extension IModelManipulations manipulation
 
-//	extension TypeGraphBasicPackage tgbPackage = TypeGraphBasicPackage::eINSTANCE
 	extension TypeGraphTracePackage tgtPackage = TypeGraphTracePackage::eINSTANCE
 	extension TraceQueries queries = TraceQueries::instance
 	val AdvancedIncQueryEngine engine
@@ -76,11 +75,6 @@ class TraceTransformation {
 		classListTrace.TClasses += tClasses
 		
 		trace.classLists += classListTrace
-//		println(classListTrace.concatSignature)
-//		println(classListTrace.TClasses)
-//		println("classes: " + trace.programGraph.classes)
-//		println("classList: " + trace.classLists)
-//		println("trace: " + trace)
 		return classListTrace
 	}
 }
