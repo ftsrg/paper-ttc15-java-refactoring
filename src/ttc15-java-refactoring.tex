@@ -41,38 +41,27 @@ Refactoring operations are often used in software engineering to improve the rea
 \item Synchronising the source code and the program graph.
 \end{enumerate}
 
-The source code is defined in a restricted sub-language of Java 1.4. The EMF metamodel of the PG is provided in the case description. The case considers two basic refactoring operations: \pum and \cscz.
-
-The solution is tested in an automated test framework, ARTE (Automated Refactoring Test Environment). ARTE runs a set of test cases, each consisting of a source code project and refactoring operations to check the correctness and the performance of the solution.
+The source code is defined in a restricted sub-language of Java 1.4. The EMF metamodel of the PG is provided in the case description. The case considers two basic refactoring operations: \pum and \cscz. The solution is tested in an automated test framework, ARTE (Automated Refactoring Test Environment). %ARTE runs a set of test cases, each consisting of a source code project and refactoring operations to check the correctness and the performance of the solution.
 
 \section{Technologies}
 
 Solving the case requires the integration of a model transformation tool and a Java source code parser. In this section, we introduce the technologies used in our solution.
 
-\subsection{\eiq}
+\paragraph{\eiq.} The objective of the \eiq~\cite{models2010, eiq-homepage} framework is to provide a declarative way to define queries over EMF models. \eiq extended the pattern language of \viatratwo with new features (including transitive closure, role navigation, match count) and tailored it to EMF models, resulting in the \iqpl~\cite{iqpl}. While \eiq is developed with a focus on \emph{incremental query evaluation}, the latest version also provides a \emph{local search-based query evaluation} algorithm.
 
-The objective of the \eiq~\cite{models2010, eiq-homepage} framework is to provide a declarative way to define queries over EMF models. \eiq extended the pattern language of \viatratwo with new features (including transitive closure, role navigation, match count) and tailored it to EMF models, resulting in the \iqpl~\cite{iqpl}. While \eiq is developed with a focus on \emph{incremental query evaluation}, the latest version also provides a \emph{local search-based query evaluation} algorithm.
+\paragraph{\viatra.} The \viatra framework supports the development of model transformations with a particular emphasis on event-driven, reactive transformations~\cite{viatra}. Building upon the incremental query support provided by \eiq, \viatra offers a language to define transformations and a reactive transformation engine to execute certain transformations upon changes in the underlying model. The current \viatra{} project is a full rewrite of the previous \viatratwo{} framework, now with full compatibility and support for EMF models. %The history of the \viatra{} family is described in~\cite{viatra-history}.
 
-\subsection{\viatra}
+%The \viatra project provides:
+%\begin{itemize}[noitemsep]
+%	\item An internal DSL over the \xtend~\cite{Xtend} language to specify both batch and event-driven, reactive transformations.
+%	\item A complex event-processing engine over EMF models to specify reactions upon detecting complex sequences of events.
+%	\item A rule-based design space exploration framework to explore design candidates as models satisfying multiple criteria.
+%	\item A model obfuscator to remove sensitive information from a confidential model, \eg for creating bug reports.
+%\end{itemize}
 
-The \viatra framework supports the development of model transformations with a particular emphasis on event-driven, reactive transformations~\cite{viatra}. Building upon the incremental query support provided by \eiq, \viatra offers a language to define transformations and a reactive transformation engine to execute certain transformations upon changes in the underlying model. The \viatra project provides:
+\paragraph{Java Development Tools.} The solution requires a technology to parse the Java code into a program graph model and serialize the modified graph model back to source code. While the case description mentions the JaMoPP~\cite{JaMoPP} and MoDisco~\cite{MoDisco} technologies, our solution builds on top of the Eclipse Java Development Tools (JDT)~\cite{jdt} used in the Eclipse Java IDE as we were already using JDT in other projects. Compared to the MoDisco framework (which uses JDT internally), we found JDT to be simpler to deploy outside the Eclipse environment, \ie without defining an Eclipse workspace. Meanwhile, the JaMoPP project has almost completely been abandoned and therefore it is only capable of parsing Java 1.5 source files. While this would not pose a problem for this case, we think it is best to use an actively developed technology such as JDT which supports the latest (1.8) version of the Java language. As JDT is frequently used to parse large source code repositories, it is carefully optimised and supports lazy loading. Unlike JaMoPP and MoDisco, JDT does not produce an EMF model.
 
-\begin{itemize}[noitemsep]
-	\item An internal DSL over the \xtend~\cite{Xtend} language to specify both batch and event-driven, reactive transformations.
-	\item A complex event-processing engine over EMF models to specify reactions upon detecting complex sequences of events.
-	\item A rule-based design space exploration framework to explore design candidates as models satisfying multiple criteria.
-	\item A model obfuscator to remove sensitive information from a confidential model, \eg for creating bug reports.
-\end{itemize}
-
-The current \viatra{} project is a full rewrite of the previous \viatratwo{} framework, now with full compatibility and support for EMF models. The history of the \viatra{} family is described in~\cite{viatra-history}.
-
-\subsection{Java Development Tools}
-
-The solution requires a technology to parse the Java code into a program graph model and serialize the modified graph model back to source code. While the case description mentions the JaMoPP~\cite{JaMoPP} and MoDisco~\cite{MoDisco} technologies, our solution builds on top of the Eclipse Java Development Tools (JDT)~\cite{jdt} used in the Eclipse Java IDE as we were already using JDT in other projects.
-
-Compared to the MoDisco framework (which uses JDT internally), we found JDT to be simpler to deploy outside the Eclipse environment, \ie without defining an Eclipse workspace. Meanwhile, the JaMoPP project has almost completely been abandoned and therefore it is only capable of parsing Java 1.5 source files. While this would not pose a problem for this case, we think it is best to use an actively developed technology such as JDT which supports the latest (1.8) version of the Java language. As JDT is frequently used to parse large source code repositories, it is carefully optimised and supports lazy loading. Unlike JaMoPP and MoDisco, JDT does not produce an EMF model.
-
-The JDT parser generates Abstract Syntax Trees (ASTs) from the provided source code files with an optional binding resolution mechanism. This way, the separate syntax trees can be connected to an Abstract Syntax Graph (ASG).
+%The JDT parser generates Abstract Syntax Trees (ASTs) from the provided source code files with an optional binding resolution mechanism. This way, the separate syntax trees can be connected to an Abstract Syntax Graph (ASG).
 
 
 
@@ -84,7 +73,7 @@ The code is written in Java~8 and Xtend~\cite{Xtend}. The queries and transforma
 
 \subsection{Workflow of the Transformation}
 
-\ttcfig{pg}{Workflow of the transformation}{0.8}
+\ttcfig{pg}{Workflow of the transformation}{0.7}
 
 \noindent\autoref{fig:pg} shows the high-level workflow of the transformation. This consists of five steps: the source code is parsed into an ASG~\ttccircled{1}; a PG is produced~\ttccircled{2}; based on the PG, the possible transformations are calculated~\ttccircled{3}; if possible, these transformations are executed~\ttccircled{4}; finally, the results of the transformations are serialized~\ttccircled{5}. In the following, we discuss these steps in detail.
 
@@ -96,15 +85,12 @@ Since JDT does not produce EMF models, the generated ASTs do not support complex
 
 \begin{enumerate}[noitemsep]
 \item For each object, the visitor method creates the corresponding object(s) in the PG. Since the order of these visits is non-deterministic, the visitor maintains maps to store the mapping from the objects in the ASG to the objects in the PG.
-
 These maps provide trace information between the JDT model and the partially built PG. The visitor also collects the relations between JDT nodes and caches the unique identifiers of each connected node for every relation type. 
 
 \item After every compilation unit has been parsed, the previously populated caches are used to create the cross-references between the objects in the PG (\eg \ttcsf{TMember.access}).
 \end{enumerate}
 
 \subsection[Extending the PG with the Trace Model]{Extending the PG with the Trace Model\qquad\ttccircled{2}\ttccircled{3}\ttccircled{4}}
-
-\ttcfig{trace-mm}{Metamodel of the trace model}{0.95}
 
 \noindent The main patterns for both refactoring operations contain a condition that \eiq does not support out of the box, \eg checking ``every child'' (a collection of classes) of a certain class. Passing collections as pattern parameter is only possible with a workaround. Also, the \iqpl does not support universal quantifiers. To overcome these limitations, we extended the program graph metamodel with a \emph{trace model} shown in~\autoref{fig:trace-mm}. The trace model defines traces for method signatures and class lists:
 
@@ -146,45 +132,11 @@ The LHS is defined in~\autoref{lst:CSCQueries.eiq} with the \ttcsf{possibleCSC} 
 
 \subsection[Transforming the ASG to Source Code]{Transforming the ASG to Source Code\qquad\ttccircled{5}}
 
-The changes in the ASG made by the transformations are propagated to the source code. JDT is capable of incrementally maintaining each source code file (compilation unit) based on the changes in its AST.\footnote{The \textsf{CompilationUnit.rewrite()} method returns a set of text manipulation operations in the form of a \textsf{TextEdit} object.}
+The changes in the ASG made by the transformations are propagated to the source code. JDT is capable of incrementally maintaining each source code file (compilation unit) based on the changes in its AST.%\footnote{The \textsf{CompilationUnit.rewrite()} method returns a set of text manipulation operations in the form of a \textsf{TextEdit} object.}
 
 \section{Evaluation}
 
-The benchmarks were conducted on a 64-bit Arch Linux virtual machine running in SHARE. The machine utilized a single core of a 2.00~GHz Xeon E5-2650 CPU and 1~GB of RAM. We used OpenJDK~8 to run the ARTE framework and the solution.
-
-\subsection{Benchmark Results}
-
-We executed the tests and used the log files to determine the execution times. The execution times of the test cases are listed in \autoref{tab:execution-times}. 
-
-\begin{table}[!htb]
-\centering
-\footnotesize
-\begin{tabular}{| l | r |}
-\hline
-\bf test case & \bf time [s]\\\hline\hline
-\sf pub\_pum1\_1\_paper1 & 0.463 \\\hline
-\sf pub\_pum1\_2 & 0.013 \\\hline
-\sf pub\_pum2\_1 & 0.333 \\\hline
-\sf pub\_pum3\_1 & 0.094 \\\hline
-\sf pub\_csc1\_1 & 0.189 \\\hline
-\sf pub\_csc1\_2 & 0.093 \\\hline
-\sf hidden\_pum1\_1 & 0.063 \\\hline
-\sf hidden\_pum1\_2 & 0.013 \\\hline
-\sf hidden\_pum2\_1 & 0.114 \\\hline
-\sf hidden\_pum2\_2 & 0.082 \\\hline
-\sf hidden\_csc1\_1 & 0.081 \\\hline
-\sf hidden\_csc1\_2 & 0.007 \\\hline
-\sf hidden\_csc2\_1 & 0.058 \\\hline
-\sf hidden\_csc3\_1a & 0.189 \\\hline
-\sf hidden\_csc3\_1 & 0.179 \\\hline
-
-\end{tabular}\caption{Execution times for the test cases.}
-\label{tab:execution-times}
-\end{table}
-
-\subsection{Analysis of the Solution}
-
-The results show that all public and hidden test cases have been executed successfully. Hence, we consider the solution \emph{complete} and \emph{correct}. As the test cases only contained small examples, we cannot draw conclusions on the performance of the solution. Still, it is worth noting that all test cases executed in less than half a second.
+We executed the tests and used the log files to determine the execution times. The execution times of the test cases are listed in \autoref{tab:execution-times}. The results show that all public and hidden test cases have been executed successfully. Hence, we consider the solution \emph{complete} and \emph{correct}. As the test cases only contained small examples, we cannot draw conclusions on the performance of the solution. Still, it is worth noting that all test cases executed in less than half a second.
 
 The implementation of the solution required quite a lot of code. The patterns were formulated in about 150 lines of \iqpl code. The transformations required 400 lines of Xtend code, while implementing the interface required by ARTE and the visitor for the transformation required more than 800 lines of Java code. However, the source code is well-structured and is easy to comprehend.
 
@@ -217,5 +169,39 @@ This paper presented a solution for the Java Refactoring case of the 2015 Transf
 \listingxtend{PUMTransformation.xtend}{\pum transformation}
 
 \listingxtend{CSCTransformation.xtend}{\cscz transformation}
+
+\subsection{Metamodel of the Trace Model}
+	
+\ttcfig{trace-mm}{Metamodel of the trace model}{0.9}
+
+\subsection{Benchmark Results}
+
+The benchmarks were conducted on a 64-bit Arch Linux virtual machine running in SHARE. The machine utilized a single core of a 2.00~GHz Xeon E5-2650 CPU and 1~GB of RAM. We used OpenJDK~8 to run the ARTE framework and the solution.
+
+\begin{table}[!htb]
+	\centering
+	\footnotesize
+	\begin{tabular}{| l | r |}
+		\hline
+		\bf test case & \bf time [s]\\\hline\hline
+		\sf pub\_pum1\_1\_paper1 & 0.463 \\\hline
+		\sf pub\_pum1\_2 & 0.013 \\\hline
+		\sf pub\_pum2\_1 & 0.333 \\\hline
+		\sf pub\_pum3\_1 & 0.094 \\\hline
+		\sf pub\_csc1\_1 & 0.189 \\\hline
+		\sf pub\_csc1\_2 & 0.093 \\\hline
+		\sf hidden\_pum1\_1 & 0.063 \\\hline
+		\sf hidden\_pum1\_2 & 0.013 \\\hline
+		\sf hidden\_pum2\_1 & 0.114 \\\hline
+		\sf hidden\_pum2\_2 & 0.082 \\\hline
+		\sf hidden\_csc1\_1 & 0.081 \\\hline
+		\sf hidden\_csc1\_2 & 0.007 \\\hline
+		\sf hidden\_csc2\_1 & 0.058 \\\hline
+		\sf hidden\_csc3\_1a & 0.189 \\\hline
+		\sf hidden\_csc3\_1 & 0.179 \\\hline
+		
+	\end{tabular}\caption{Execution times for the test cases.}
+	\label{tab:execution-times}
+\end{table}
 
 \end{document}
