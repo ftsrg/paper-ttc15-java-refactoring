@@ -118,7 +118,7 @@ After creating the method signature traces, the following preconditions must be 
 	 \item the transformation will not create an unsatisfiable method or field access.
 \end{itemize}
 
-To decide whether the refactoring can be executed, every $\langle \text{parent class}, \text{method signature} \rangle$ pair satisfying the preconditions is collected by the main pattern (\ttcsf{possiblePUM}). The LHS is defined with six patterns in total. The execution is controlled by parameterising the main pattern listed in \autoref{lst:PUMQueries.eiq}. The RHS is defined in \autoref{lst:PUMTransformation.xtend}, using one utility pattern.
+To decide whether the refactoring can be executed, every $\langle \text{parent class}, \text{method signature} \rangle$ pair satisfying the preconditions is collected by the main pattern (\ttcsf{possiblePUM}). The LHS is defined with six patterns in total. The execution is controlled by parameterising the main pattern listed in \autoref{lst:PUMQueries.eiq}. The RHS is defined in \autoref{lst:PUMTransformation.xtend} using one utility pattern.
 
 \subsubsection{Create Superclass}
 To create a new superclass, the parent class and the list of selected classes (connected to a class list trace) have to be passed to the pattern. The transformation can be executed if the following preconditions are satisfied:
